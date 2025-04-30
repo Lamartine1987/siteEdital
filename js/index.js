@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const editais = [
     { nome: "Prefeitura 2024", descricao: "Concurso municipal para diversos cargos.", link: "assuntos.html?edital=Prefeitura%202024" },
     { nome: "Banco Central 2025", descricao: "Concurso nacional para o Banco Central.", link: "assuntos.html?edital=Banco%20Central%202025" },
@@ -22,7 +22,13 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="edital-description">${edital.descricao}</div>
       `;
       card.addEventListener('click', () => {
-        window.location.href = edital.link;
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            window.location.href = edital.link;
+          } else {
+            document.getElementById('loginModal').style.display = 'flex';
+          }
+        });
       });
       container.appendChild(card);
     });
@@ -40,4 +46,17 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   renderEditais(editais);
+
+  // Corrigido: agora leva para a tela de login real
+  document.getElementById('modalLoginBtn').addEventListener('click', () => {
+    window.location.href = "login.html";
+  });
+
+  document.getElementById('modalRegisterBtn').addEventListener('click', () => {
+    window.location.href = "cadastro.html"; // <--- NOVO DESTINO CORRETO
+  });
+
+  document.getElementById('modalCloseBtn').addEventListener('click', () => {
+    document.getElementById('loginModal').style.display = 'none';
+  });
 });
