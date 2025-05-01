@@ -40,5 +40,23 @@ document.addEventListener('DOMContentLoaded', function () {
       authBtn.innerText = isLoginMode ? "Entrar" : "Cadastrar";
       toggle.innerText = isLoginMode ? "Não tem conta? Cadastre-se" : "Já tem conta? Faça login";
     });
+
+    document.getElementById('esqueciSenhaLink').addEventListener('click', () => {
+      const userEmail = document.getElementById('email').value.trim();
+    
+      if (!userEmail) {
+        alert("Digite seu e-mail para recuperar a senha.");
+        return;
+      }
+    
+      firebase.auth().sendPasswordResetEmail(userEmail)
+        .then(() => {
+          alert("E-mail de recuperação enviado. Verifique sua caixa de entrada.");
+        })
+        .catch(error => {
+          alert("Erro ao enviar e-mail de recuperação: " + error.message);
+        });
+    });
+    
   });
   

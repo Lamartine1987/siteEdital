@@ -3,19 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>Cadastro - Consulta de Editais</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+  <!-- Firebase config e script -->
   <script src="js/firebaseConfig.js" defer></script>
   <script src="js/cadastro.js" defer></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
       margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #1e81f3, #4da3ff);
     }
 
     .form-container {
@@ -38,21 +44,23 @@
       margin-bottom: 15px;
       border: 1px solid #ccc;
       border-radius: 6px;
+      box-sizing: border-box;
     }
 
     button {
       width: 100%;
       padding: 10px;
-      background: #007bff;
+      background: linear-gradient(90deg, #007bff, #00c6ff);
       color: white;
       border: none;
       border-radius: 6px;
       font-weight: bold;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
 
     button:hover {
-      background: #0056b3;
+      background: linear-gradient(90deg, #0056b3, #00aaff);
     }
 
     .link {

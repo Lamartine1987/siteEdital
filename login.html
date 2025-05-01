@@ -17,13 +17,13 @@
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
       margin: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #1e81f3, #4da3ff);
     }
 
     .form-container {
@@ -52,16 +52,17 @@
     button {
       width: 100%;
       padding: 10px;
-      background: #007bff;
-      color: white;
       border: none;
       border-radius: 6px;
-      cursor: pointer;
       font-weight: bold;
+      background: linear-gradient(90deg, #007bff, #00c6ff);
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
     }
 
     button:hover {
-      background: #0056b3;
+      background: linear-gradient(90deg, #0056b3, #00aaff);
     }
 
     .toggle {
@@ -71,15 +72,37 @@
       cursor: pointer;
       text-align: center;
     }
+
+    .link {
+      text-align: right;
+      margin-top: -10px;
+      margin-bottom: 15px;
+    }
+
+    .link a {
+      color: #007bff;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .link a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
 
   <div class="form-container">
     <h2 id="formTitle">Login</h2>
-    <input type="email" id="email" placeholder="E-mail">
-    <input type="password" id="password" placeholder="Senha">
+    <input type="email" id="email" placeholder="E-mail" required>
+    <input type="password" id="password" placeholder="Senha" required>
+
+    <div class="link">
+      <a href="#" id="esqueciSenhaLink">Esqueci minha senha</a>
+    </div>
+
     <button id="authBtn">Entrar</button>
+
     <div class="toggle" id="toggleMode">Não tem conta? Cadastre-se</div>
   </div>
 
