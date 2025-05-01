@@ -57,6 +57,11 @@ document.addEventListener('DOMContentLoaded', function () {
           alert("Erro ao enviar e-mail de recuperação: " + error.message);
         });
     });
+
+    document.getElementById('cancelarBtn').addEventListener('click', () => {
+      window.location.href = "index.html";
+    });
+    
     
   });
   

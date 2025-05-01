@@ -5,14 +5,12 @@
   <title>Login - Consulta de Editais</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Firebase SDKs compatíveis -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
-  <!-- Configuração do Firebase -->
+  <!-- Firebase Config e Scripts -->
   <script src="js/firebaseConfig.js" defer></script>
-
-  <!-- Script de login -->
   <script src="js/login.js" defer></script>
 
   <style>
@@ -49,24 +47,44 @@
       box-sizing: border-box;
     }
 
-    button {
+    #authBtn {
       width: 100%;
       padding: 10px;
-      border: none;
+      background-color: white;
+      color: #007bff;
+      border: 2px solid #007bff;
       border-radius: 6px;
       font-weight: bold;
-      background: linear-gradient(90deg, #007bff, #00c6ff);
-      color: white;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background 0.3s ease, color 0.3s ease;
+      margin-top: 10px;
     }
 
-    button:hover {
-      background: linear-gradient(90deg, #0056b3, #00aaff);
+    #authBtn:hover {
+      background-color: #007bff;
+      color: white;
+    }
+
+    #cancelarBtn {
+      width: 100%;
+      padding: 10px;
+      background-color: white;
+      color: #dc3545;
+      border: 2px solid #dc3545;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+      margin-top: 10px;
+    }
+
+    #cancelarBtn:hover {
+      background-color: #dc3545;
+      color: white;
     }
 
     .toggle {
-      margin-top: 10px;
+      margin-top: 15px;
       font-size: 14px;
       color: #007bff;
       cursor: pointer;
@@ -102,6 +120,7 @@
     </div>
 
     <button id="authBtn">Entrar</button>
+    <button id="cancelarBtn">Cancelar</button>
 
     <div class="toggle" id="toggleMode">Não tem conta? Cadastre-se</div>
   </div>

@@ -44,4 +44,9 @@ document.addEventListener('DOMContentLoaded', function () {
         cadastrarBtn.textContent = "Cadastrar";
       });
   });
+
+  document.getElementById('cancelarBtn').addEventListener('click', () => {
+    window.location.href = "index.html";
+  });
+    
 });
