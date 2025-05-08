@@ -85,7 +85,7 @@
       auth.signInWithEmailAndPassword(userEmail, userPassword)
         .then(() => {
           alert("Login realizado!");
-          window.location.href = "../pages/index.html";
+          window.location.href = "./index.html";
         })
         .catch(err => alert("Erro no login: " + err.message));
     });
@@ -113,7 +113,7 @@
     });
   
     document.getElementById('cancelarBtn').addEventListener('click', () => {
-      window.location.href = "../pages/index.html";
+      window.location.href = "./index.html";
     });
   });
   

@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "siteeditais"
-  }
+    "default": "siteeditais",
+    "production": "siteeditais"
+  },
+  "targets": {},
+  "etags": {}
 }

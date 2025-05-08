@@ -49,11 +49,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Redirecionamento dos botões do modal
   document.getElementById('modalLoginBtn').addEventListener('click', () => {
-    window.location.href = "pages/login.html";
+    window.location.href = "login.html";
   });
 
   document.getElementById('modalRegisterBtn').addEventListener('click', () => {
-    window.location.href = "pages/cadastro.html";
+    window.location.href = "cadastro.html";
   });
 
   document.getElementById('modalCloseBtn').addEventListener('click', () => {
