@@ -47,13 +47,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   renderEditais(editais);
 
-  // Corrigido: agora leva para a tela de login real
+  // Redirecionamento dos botões do modal
   document.getElementById('modalLoginBtn').addEventListener('click', () => {
-    window.location.href = "login.html";
+    window.location.href = "pages/login.html";
   });
 
   document.getElementById('modalRegisterBtn').addEventListener('click', () => {
-    window.location.href = "cadastro.html"; // <--- NOVO DESTINO CORRETO
+    window.location.href = "pages/cadastro.html";
   });
 
   document.getElementById('modalCloseBtn').addEventListener('click', () => {

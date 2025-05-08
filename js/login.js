@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+/**document.addEventListener('DOMContentLoaded', function () {
     const auth = firebase.auth();
     const email = document.getElementById('email');
     const password = document.getElementById('password');
@@ -21,14 +21,14 @@ document.addEventListener('DOMContentLoaded', function () {
         auth.signInWithEmailAndPassword(userEmail, userPassword)
           .then(() => {
             alert("Login realizado!");
-            window.location.href = "index.html";
+            window.location.href = "../pages/index.html";
           })
           .catch(err => alert("Erro no login: " + err.message));
       } else {
         auth.createUserWithEmailAndPassword(userEmail, userPassword)
           .then(() => {
             alert("Cadastro realizado!");
-            window.location.href = "index.html";
+            window.location.href = "../pages/index.html";
           })
           .catch(err => alert("Erro no cadastro: " + err.message));
       }
@@ -59,9 +59,62 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('cancelarBtn').addEventListener('click', () => {
-      window.location.href = "index.html";
+      window.location.href = "../pages/index.html";
     });
     
     
+  });**/
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const auth = firebase.auth();
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const authBtn = document.getElementById('authBtn');
+    const toggle = document.getElementById('toggleMode');
+    const title = document.getElementById('formTitle');
+  
+    authBtn.addEventListener('click', () => {
+      const userEmail = email.value.trim();
+      const userPassword = password.value;
+  
+      if (!userEmail || !userPassword) {
+        alert("Preencha todos os campos.");
+        return;
+      }
+  
+      auth.signInWithEmailAndPassword(userEmail, userPassword)
+        .then(() => {
+          alert("Login realizado!");
+          window.location.href = "../pages/index.html";
+        })
+        .catch(err => alert("Erro no login: " + err.message));
+    });
+  
+    // ✅ Redirecionar para a página de cadastro
+    toggle.addEventListener('click', () => {
+      window.location.href = "cadastro.html";
+    });
+  
+    document.getElementById('esqueciSenhaLink').addEventListener('click', () => {
+      const userEmail = email.value.trim();
+  
+      if (!userEmail) {
+        alert("Digite seu e-mail para recuperar a senha.");
+        return;
+      }
+  
+      firebase.auth().sendPasswordResetEmail(userEmail)
+        .then(() => {
+          alert("E-mail de recuperação enviado. Verifique sua caixa de entrada.");
+        })
+        .catch(error => {
+          alert("Erro ao enviar e-mail de recuperação: " + error.message);
+        });
+    });
+  
+    document.getElementById('cancelarBtn').addEventListener('click', () => {
+      window.location.href = "../pages/index.html";
+    });
   });
+  
   

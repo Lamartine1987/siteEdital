@@ -19,11 +19,6 @@ if (edital) {
   titulo = nomesEditais[editalDecoded] || decodeURIComponent(edital);
 }
 
-document.getElementById('tituloConcurso').innerText = titulo;
-
-
-document.getElementById('tituloConcurso').innerText = titulo;
-
   document.getElementById('tituloConcurso').innerText = titulo.split(' ')
   .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
   .join(' ');
