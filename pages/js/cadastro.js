@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .then(() => {
         alert("Cadastro realizado com sucesso!");
-        window.location.href = "../pages/index.html";
+        window.location.href = "./index.html";
       })
       .catch(error => {
         alert("Erro ao cadastrar: " + error.message);
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   document.getElementById('cancelarBtn').addEventListener('click', () => {
-    window.location.href = "../pages/index.html";
+    window.location.href = "./index.html";
   });
     
 });
