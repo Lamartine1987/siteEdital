@@ -27,24 +27,50 @@ h1 {
 }
 
 #searchInput {
-  flex: 1;
-  padding: 10px;
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 16px;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 30px;
+  font-size: 16px;
+  outline: none;
+  transition: 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background-color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-#searchButton {
-  padding: 10px 20px;
-  border: none;
-  background: linear-gradient(90deg, #4da3ff 0%, #1e81f3 100%);
-  color: white;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
+#searchInput:focus {
+  border-color: #1e81f3;
+  box-shadow: 0 0 0 3px rgba(30, 129, 243, 0.15);
 }
 
-#searchButton:hover {
-  background: linear-gradient(90deg, #1e81f3 0%, #4da3ff 100%);
+
+#searchInput {
+  width: 100%;
+  max-width: 600px; /* ← aumentamos aqui */
+  padding: 14px 20px;
+  border: 1px solid #ccc;
+  border-radius: 30px;
+  font-size: 17px;
+  outline: none;
+  transition: 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#searchInput:focus {
+  border-color: #1e81f3;
+  box-shadow: 0 0 0 3px rgba(30, 129, 243, 0.15);
+}
+
+.search-box {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0 20px;
+  margin-bottom: 40px;
 }
 
 .editais-container {

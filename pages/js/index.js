@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const container = document.getElementById('editaisContainer');
   const searchInput = document.getElementById('searchInput');
-  const searchButton = document.getElementById('searchButton');
 
   function renderEditais(lista) {
     container.innerHTML = '';
@@ -40,9 +39,10 @@ document.addEventListener('DOMContentLoaded', function () {
     renderEditais(filtrados);
   }
 
-  searchButton.addEventListener('click', buscar);
-  searchInput.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') buscar();
+  searchInput.addEventListener('input', () => {
+    const termo = searchInput.value.toLowerCase();
+    const filtrados = editais.filter(e => e.nome.toLowerCase().includes(termo));
+    renderEditais(filtrados);
   });
 
   renderEditais(editais);
