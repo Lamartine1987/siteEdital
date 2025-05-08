@@ -11,4 +11,8 @@ const firebaseConfig = {
   
   // Inicializa o Firebase
   firebase.initializeApp(firebaseConfig);
+
+  // ative o firestore
+  const db = firebase.firestore();
+
   
