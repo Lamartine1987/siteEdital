@@ -32,14 +32,14 @@
   <script>
     // Voltar para a página principal
     document.getElementById('voltarBtn').addEventListener('click', () => {
-      window.location.href = "../../../pages/index.html";
+      window.location.href = "../../index.html";
     });
 
     // Logout com Firebase
     document.getElementById('sairBtn').addEventListener('click', () => {
       firebase.auth().signOut().then(() => {
         alert("Sessão encerrada!");
-        window.location.href = "../../../pages/index.html";
+        window.location.href = "../../index.html";
       });
     });
   </script>
