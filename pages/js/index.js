@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
       card.addEventListener('click', () => {
         firebase.auth().onAuthStateChanged(function(user) {
           if (user) {
-            window.location.href = `materias/paginaEditais.html?edital=${encodeURIComponent(edital.nome)}`;
+            window.location.href = `materias/paginaEditais.html?id=${encodeURIComponent(edital.id)}`;
           } else {
             document.getElementById('loginModal').style.display = 'flex';
 
@@ -55,5 +55,5 @@ document.addEventListener('DOMContentLoaded', function () {
     renderEditais(filtrados);
   });
 
-  renderEditais(editais);
+  /*renderEditais(editais);*/
 });
