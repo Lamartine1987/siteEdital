@@ -28,15 +28,15 @@ h2 {
   background: #fff;
   padding: 11px 20px;
   border-bottom: 1px solid #ddd;
-  .assunto-row:not(.header) {
-    margin-bottom: 10px; /* ou 8px, 12px, ajuste como quiser */
-    border-radius: 8px;
-  }
+  margin-bottom: 7px;
+  border-radius: 8px;
 }
 
-.assunto-row.estudado {
-  background-color: #d4edda;
+div.assunto-row.estudado {
+  background-color: #d4edda !important;
+  transition: background-color 0.3s ease;
 }
+
 
 .assunto-row.header {
   background-color: #007bff;

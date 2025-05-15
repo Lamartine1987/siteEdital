@@ -1,5 +1,8 @@
 function logout() {
-  firebase.auth().signOut().then(() => location.href = '../index.html');
+  firebase
+    .auth()
+    .signOut()
+    .then(() => (location.href = "../index.html"));
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -30,14 +33,25 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    const progressoSnap = await db.ref(`usuarios/${user.uid}/progresso/${idEdital}/${cargo}/${materia}`).once("value");
+    // 🔎 Pega progresso
+    const progressoSnap = await db
+      .ref(`usuarios/${user.uid}/progresso/${idEdital}/${cargo}/${materia}`)
+      .once("value");
     const progresso = progressoSnap.val() || {};
 
-    container.innerHTML = '';
+    container.innerHTML = "";
+
     assuntos.forEach((texto) => {
+      // Cria uma chave segura e padronizada para salvar e recuperar do Firebase
+      const assuntoKey = texto
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^\w]/g, "");
+
       const linha = document.createElement("div");
       linha.className = "assunto-row";
-      if (progresso[texto]) linha.classList.add("estudado");
+      if (progresso[assuntoKey]) linha.classList.add("estudado");
 
       const span = document.createElement("div");
       span.className = "assunto-texto";
@@ -45,10 +59,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
-      checkbox.checked = !!progresso[texto];
+      checkbox.checked = !!progresso[assuntoKey];
       checkbox.onchange = async () => {
-        await db.ref(`usuarios/${user.uid}/progresso/${idEdital}/${cargo}/${materia}/${texto}`).set(checkbox.checked);
-        linha.classList.toggle("estudado", checkbox.checked);
+        await db
+          .ref(
+            `usuarios/${user.uid}/progresso/${idEdital}/${cargo}/${materia}/${assuntoKey}`
+          )
+          .set(checkbox.checked);
+        linha.classList.toggle("estudado", checkbox.checked); // ✅ aplica classe visual
       };
 
       const editar = document.createElement("i");
