@@ -1,12 +1,17 @@
 document.addEventListener('DOMContentLoaded', function () {
-
-  db.collection("editais").get().then(querySnapshot => {
-    editais = querySnapshot.docs.map(doc => doc.data());
-    renderEditais(editais);
-  });
-
+  const db = firebase.database(); // ✅ Realtime DB
   const container = document.getElementById('editaisContainer');
   const searchInput = document.getElementById('searchInput');
+  let editais = [];
+
+  // 🔄 Buscar editais do Realtime Database
+  db.ref("editais").once("value").then(snapshot => {
+    const data = snapshot.val();
+
+    // Transforma objeto em array
+    editais = Object.values(data);
+    renderEditais(editais);
+  });
 
   function renderEditais(lista) {
     container.innerHTML = '';
@@ -15,8 +20,9 @@ document.addEventListener('DOMContentLoaded', function () {
       card.className = 'edital-card';
       card.innerHTML = `
         <div class="edital-title">${edital.nome}</div>
-        <div class="edital-description">${edital.descricao}</div>
+        <div class="edital-description">${edital.descricao || ''}</div>
       `;
+
       card.addEventListener('click', () => {
         firebase.auth().onAuthStateChanged(function(user) {
           if (user) {
@@ -39,14 +45,9 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         });
       });
+
       container.appendChild(card);
     });
-  }
-
-  function buscar() {
-    const termo = searchInput.value.toLowerCase();
-    const filtrados = editais.filter(e => e.nome.toLowerCase().includes(termo));
-    renderEditais(filtrados);
   }
 
   searchInput.addEventListener('input', () => {
@@ -54,6 +55,4 @@ document.addEventListener('DOMContentLoaded', function () {
     const filtrados = editais.filter(e => e.nome.toLowerCase().includes(termo));
     renderEditais(filtrados);
   });
-
-  /*renderEditais(editais);*/
 });

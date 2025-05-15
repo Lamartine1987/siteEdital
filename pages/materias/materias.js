@@ -12,96 +12,89 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  const db = firebase.firestore();
+  const db = firebase.database();
 
-  db.collection("editais")
-    .where("id", "==", idEdital)
-    .get()
-    .then(querySnapshot => {
-      if (querySnapshot.empty) {
-        titulo.textContent = "Edital não encontrado.";
+  // Percorre todos os editais para encontrar aquele com o id correto
+  db.ref("editais").once("value").then(snapshot => {
+    const editais = snapshot.val();
+    let editalEncontrado = null;
+    let chaveEdital = null;
+
+    for (const chave in editais) {
+      if (editais[chave].id === idEdital) {
+        editalEncontrado = editais[chave];
+        chaveEdital = chave;
+        break;
+      }
+    }
+
+    if (!editalEncontrado) {
+      titulo.textContent = "Edital não encontrado.";
+      return;
+    }
+
+    titulo.textContent = editalEncontrado.nome;
+    container.innerHTML = '';
+
+    const cargos = editalEncontrado.cargos;
+
+    if (!cargoSelecionado) {
+      // Exibe os cargos
+      for (const nomeCargo in cargos) {
+        const card = document.createElement("div");
+        card.className = "card-materia";
+        card.innerHTML = `<h3>${nomeCargo}</h3>`;
+        card.onclick = () => {
+          window.location.href = `paginaEditais.html?id=${idEdital}&cargo=${nomeCargo}`;
+        };
+        container.appendChild(card);
+      }
+
+    } else if (!materiaSelecionada) {
+      // Exibe as matérias
+      const cargoData = cargos[cargoSelecionado];
+
+      if (!cargoData || !cargoData.materias) {
+        container.innerHTML = "<p>Nenhuma matéria encontrada para este cargo.</p>";
         return;
       }
 
-      const edital = querySnapshot.docs[0].data();
-      titulo.textContent = edital.nome;
-      container.innerHTML = '';
-
-      const cargos = edital.cargo;
-
-      if (!cargoSelecionado) {
-        // 1️⃣ Exibe os cargos
-        for (const grupo in cargos) {
-          const subcargos = cargos[grupo];
-          for (const nomeCargo in subcargos) {
-            const card = document.createElement("div");
-            card.className = "card-materia";
-            card.innerHTML = `<h3>${nomeCargo}</h3>`;
-            card.onclick = () => {
-              window.location.href = `paginaEditais.html?id=${idEdital}&cargo=${nomeCargo}`;
-            };
-            container.appendChild(card);
-          }
-        }
-
-      } else if (!materiaSelecionada) {
-        // 2️⃣ Exibe as matérias do cargo
-        let cargoData;
-        for (const grupo in cargos) {
-          if (cargos[grupo][cargoSelecionado]) {
-            cargoData = cargos[grupo][cargoSelecionado];
-            break;
-          }
-        }
-
-        if (!cargoData || !cargoData.materias) {
-          container.innerHTML = "<p>Nenhuma matéria encontrada para este cargo.</p>";
-          return;
-        }
-
-        for (const nomeMateria in cargoData.materias) {
-          const card = document.createElement("div");
-          card.className = "card-materia";
-          card.innerHTML = `<h3>${nomeMateria}</h3>`;
-          card.onclick = () => {
-            window.location.href = `paginaEditais.html?id=${idEdital}&cargo=${cargoSelecionado}&materia=${encodeURIComponent(nomeMateria)}`;
-          };
-          container.appendChild(card);
-        }
-
-      } else {
-        // 3️⃣ Exibe os assuntos da matéria
-        let cargoData;
-        for (const grupo in cargos) {
-          if (cargos[grupo][cargoSelecionado]) {
-            cargoData = cargos[grupo][cargoSelecionado];
-            break;
-          }
-        }
-
-        const assuntos = cargoData?.materias?.[materiaSelecionada];
-        if (!assuntos) {
-          container.innerHTML = "<p>Assuntos não encontrados.</p>";
-          return;
-        }
-
+      for (const nomeMateria in cargoData.materias) {
         const card = document.createElement("div");
         card.className = "card-materia";
-        card.innerHTML = `<h3>${materiaSelecionada}</h3>`;
-
-        const lista = document.createElement("ul");
-        for (const chave in assuntos) {
-          const li = document.createElement("li");
-          li.textContent = assuntos[chave];
-          lista.appendChild(li);
-        }
-
-        card.appendChild(lista);
+        card.innerHTML = `<h3>${nomeMateria}</h3>`;
+        card.onclick = () => {
+          window.location.href = `assuntos.html?id=${idEdital}&cargo=${cargoSelecionado}&materia=${encodeURIComponent(nomeMateria)}`;
+        };
         container.appendChild(card);
       }
-    })
-    .catch(error => {
-      console.error("Erro ao buscar dados:", error);
-      titulo.textContent = "Erro ao carregar o edital.";
-    });
+
+    } else {
+      // Exibe os assuntos da matéria
+      const cargoData = cargos[cargoSelecionado];
+      const assuntos = cargoData?.materias?.[materiaSelecionada];
+
+      if (!assuntos) {
+        container.innerHTML = "<p>Assuntos não encontrados.</p>";
+        return;
+      }
+
+      const card = document.createElement("div");
+      card.className = "card-materia";
+      card.innerHTML = `<h3>${materiaSelecionada}</h3>`;
+
+      const lista = document.createElement("ul");
+      for (const assunto of assuntos) {
+        const li = document.createElement("li");
+        li.textContent = assunto;
+        lista.appendChild(li);
+      }
+
+      card.appendChild(lista);
+      container.appendChild(card);
+    }
+  }).catch(error => {
+    console.error("Erro ao buscar dados:", error);
+    titulo.textContent = "Erro ao carregar o edital.";
+  });
 });
