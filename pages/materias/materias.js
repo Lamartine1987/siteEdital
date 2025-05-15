@@ -1,9 +1,14 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const idEdital = new URLSearchParams(window.location.search).get("id")?.trim();
-  console.log("Edital ID recebido:", idEdital); // 🔍 debug
+  const params = new URLSearchParams(window.location.search);
+  const idEdital = params.get("id")?.trim();
+  const cargoSelecionado = params.get("cargo")?.trim();
+  const materiaSelecionada = params.get("materia")?.trim();
+
+  const titulo = document.getElementById("tituloEdital");
+  const container = document.getElementById("materiasContainer");
 
   if (!idEdital) {
-    document.getElementById("tituloEdital").textContent = "Nenhum edital selecionado.";
+    titulo.textContent = "Nenhum edital selecionado.";
     return;
   }
 
@@ -14,49 +19,89 @@ document.addEventListener("DOMContentLoaded", function () {
     .get()
     .then(querySnapshot => {
       if (querySnapshot.empty) {
-        document.getElementById("tituloEdital").textContent = "Edital não encontrado.";
+        titulo.textContent = "Edital não encontrado.";
         return;
       }
 
-      querySnapshot.forEach(doc => {
-        const edital = doc.data();
-        console.log("✅ Edital carregado:", edital); // 🔍 debug
+      const edital = querySnapshot.docs[0].data();
+      titulo.textContent = edital.nome;
+      container.innerHTML = '';
 
-        document.getElementById("tituloEdital").textContent = edital.nome;
+      const cargos = edital.cargo;
 
-        const container = document.getElementById("materiasContainer");
-        container.innerHTML = '';
-
-        const materias = edital.materias;
-
-        for (const nomeMateria in materias) {
-          if (materias.hasOwnProperty(nomeMateria)) {
+      if (!cargoSelecionado) {
+        // 1️⃣ Exibe os cargos
+        for (const grupo in cargos) {
+          const subcargos = cargos[grupo];
+          for (const nomeCargo in subcargos) {
             const card = document.createElement("div");
             card.className = "card-materia";
-
-            const titulo = document.createElement("h3");
-            titulo.textContent = nomeMateria.charAt(0).toUpperCase() + nomeMateria.slice(1);
-            card.appendChild(titulo);
-
-            const lista = document.createElement("ul");
-            const assuntos = materias[nomeMateria];
-
-            for (const chave in assuntos) {
-              if (assuntos.hasOwnProperty(chave)) {
-                const li = document.createElement("li");
-                li.textContent = assuntos[chave];
-                lista.appendChild(li);
-              }
-            }
-
-            card.appendChild(lista);
+            card.innerHTML = `<h3>${nomeCargo}</h3>`;
+            card.onclick = () => {
+              window.location.href = `paginaEditais.html?id=${idEdital}&cargo=${nomeCargo}`;
+            };
             container.appendChild(card);
           }
         }
-      });
+
+      } else if (!materiaSelecionada) {
+        // 2️⃣ Exibe as matérias do cargo
+        let cargoData;
+        for (const grupo in cargos) {
+          if (cargos[grupo][cargoSelecionado]) {
+            cargoData = cargos[grupo][cargoSelecionado];
+            break;
+          }
+        }
+
+        if (!cargoData || !cargoData.materias) {
+          container.innerHTML = "<p>Nenhuma matéria encontrada para este cargo.</p>";
+          return;
+        }
+
+        for (const nomeMateria in cargoData.materias) {
+          const card = document.createElement("div");
+          card.className = "card-materia";
+          card.innerHTML = `<h3>${nomeMateria}</h3>`;
+          card.onclick = () => {
+            window.location.href = `paginaEditais.html?id=${idEdital}&cargo=${cargoSelecionado}&materia=${encodeURIComponent(nomeMateria)}`;
+          };
+          container.appendChild(card);
+        }
+
+      } else {
+        // 3️⃣ Exibe os assuntos da matéria
+        let cargoData;
+        for (const grupo in cargos) {
+          if (cargos[grupo][cargoSelecionado]) {
+            cargoData = cargos[grupo][cargoSelecionado];
+            break;
+          }
+        }
+
+        const assuntos = cargoData?.materias?.[materiaSelecionada];
+        if (!assuntos) {
+          container.innerHTML = "<p>Assuntos não encontrados.</p>";
+          return;
+        }
+
+        const card = document.createElement("div");
+        card.className = "card-materia";
+        card.innerHTML = `<h3>${materiaSelecionada}</h3>`;
+
+        const lista = document.createElement("ul");
+        for (const chave in assuntos) {
+          const li = document.createElement("li");
+          li.textContent = assuntos[chave];
+          lista.appendChild(li);
+        }
+
+        card.appendChild(lista);
+        container.appendChild(card);
+      }
     })
     .catch(error => {
-      console.error("Erro ao carregar edital:", error);
-      document.getElementById("tituloEdital").textContent = "Erro ao buscar o edital.";
+      console.error("Erro ao buscar dados:", error);
+      titulo.textContent = "Erro ao carregar o edital.";
     });
 });
