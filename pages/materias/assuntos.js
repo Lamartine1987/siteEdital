@@ -19,9 +19,35 @@ document.addEventListener("DOMContentLoaded", () => {
   firebase.auth().onAuthStateChanged(async (user) => {
     if (!user) {
       alert("É necessário estar logado");
+      location.href = "../index.html";
       return;
     }
 
+    const userId = user.uid;
+
+    // Verifica se está matriculado
+    const tipoSnapshot = await db.ref(`usuarios/${userId}/tipo`).once("value");
+    const tipoUsuario = tipoSnapshot.val() || "gratuito";
+    const isPremium = tipoUsuario === "premium";
+
+    const refMatricula = isPremium
+      ? db.ref(`usuarios/${userId}/matriculados/${idEdital}/${cargo}`)
+      : db.ref(`usuarios/${userId}/matriculados`);
+
+    const matriculaSnap = await refMatricula.once("value");
+    const dadosMatricula = matriculaSnap.val();
+
+    const estaMatriculado = isPremium
+      ? !!dadosMatricula
+      : dadosMatricula?.id === idEdital && dadosMatricula?.cargo === cargo;
+
+    if (!estaMatriculado) {
+      alert("Você precisa se matricular neste cargo para visualizar os assuntos.");
+      location.href = `paginaEditais.html?id=${idEdital}`;
+      return;
+    }
+
+    // 🔽 Só chega aqui se estiver matriculado
     const snapshot = await db.ref("editais").once("value");
     const editais = snapshot.val();
 
@@ -33,16 +59,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // 🔎 Pega progresso
     const progressoSnap = await db
-      .ref(`usuarios/${user.uid}/progresso/${idEdital}/${cargo}/${materia}`)
+      .ref(`usuarios/${userId}/progresso/${idEdital}/${cargo}/${materia}`)
       .once("value");
     const progresso = progressoSnap.val() || {};
 
     container.innerHTML = "";
 
     assuntos.forEach((texto) => {
-      // Cria uma chave segura e padronizada para salvar e recuperar do Firebase
       const assuntoKey = texto
         .trim()
         .toLowerCase()
@@ -62,11 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
       checkbox.checked = !!progresso[assuntoKey];
       checkbox.onchange = async () => {
         await db
-          .ref(
-            `usuarios/${user.uid}/progresso/${idEdital}/${cargo}/${materia}/${assuntoKey}`
-          )
+          .ref(`usuarios/${userId}/progresso/${idEdital}/${cargo}/${materia}/${assuntoKey}`)
           .set(checkbox.checked);
-        linha.classList.toggle("estudado", checkbox.checked); // ✅ aplica classe visual
+        linha.classList.toggle("estudado", checkbox.checked);
       };
 
       const editar = document.createElement("i");

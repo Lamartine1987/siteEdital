@@ -11,21 +11,20 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
   <!-- Firebase Config -->
-  <script src="../js/firebaseConfig.js"></script>
+  <script src="../js/firebaseConfig.js" defer></script>
 
   <!-- Estilo externo -->
   <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
 
   <header>
-    <button class="btn btn-home" id="voltarBtn" title="Início">
+    <button class="btn btn-home" id="voltarBtn" title="Início" aria-label="Voltar para a página inicial">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16">
         <path d="M8 .5l6.5 6.5H13v6H9.5v-4H6.5v4H3v-6H1.5L8 .5z"/>
       </svg>
     </button>
-    <button class="btn btn-sair" id="sairBtn">Sair</button>
+    <button class="btn btn-sair" id="sairBtn" aria-label="Sair da conta">Sair</button>
   </header>
 
   <div class="container">
@@ -34,31 +33,29 @@
       <span id="breadcrumb" class="breadcrumb"></span>
     </div>
 
-    <!-- Grupo de Cargos -->
     <div class="card-mestre">
       <h2 id="tituloSecao" class="titulo-cargos" style="display: none;">Assuntos</h2>
       <div id="materiasContainer" class="cards-container"></div>
     </div>
+  </div>
 
-
-
+  <!-- Scripts -->
   <script>
-    // Voltar para a página principal
-    document.getElementById('voltarBtn').addEventListener('click', () => {
-      window.location.href = "../index.html";
-    });
-
-    // Logout com Firebase
-    document.getElementById('sairBtn').addEventListener('click', () => {
-      firebase.auth().signOut().then(() => {
-        alert("Sessão encerrada!");
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById('voltarBtn').addEventListener('click', () => {
         window.location.href = "../index.html";
+      });
+
+      document.getElementById('sairBtn').addEventListener('click', () => {
+        firebase.auth().signOut().then(() => {
+          alert("Sessão encerrada!");
+          window.location.href = "../index.html";
+        });
       });
     });
   </script>
 
-  <!-- Script de exibição dinâmica -->
-  <script src="materias.js"></script>
-
+  <!-- Script principal -->
+  <script src="materias.js" defer></script>
 </body>
 </html>

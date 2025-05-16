@@ -43,14 +43,36 @@
     </div>
   </div>
 
+  <!-- Modal Meus Editais -->
+  <div id="meusEditaisModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Meus Editais Matriculados</h3>
+      <ul id="listaEditaisMatriculados" style="padding-left: 20px;"></ul>
+      <div class="modal-buttons">
+        <button onclick="fecharModalMeusEditais()" class="cancel-btn">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Lógica de autenticação para exibir botões Login / Cadastrar / Sair
     document.addEventListener("DOMContentLoaded", function () {
       const header = document.getElementById('mainHeader');
+
       firebase.auth().onAuthStateChanged(function(user) {
-        header.innerHTML = ''; // limpa o header
+        header.innerHTML = '';
 
         if (user) {
+          const meusEditaisBtn = document.createElement('button');
+          meusEditaisBtn.textContent = "Meus Editais";
+          meusEditaisBtn.style.backgroundColor = "#007bff";
+          meusEditaisBtn.style.color = "white";
+          meusEditaisBtn.style.border = "none";
+          meusEditaisBtn.style.borderRadius = "6px";
+          meusEditaisBtn.style.padding = "8px 16px";
+          meusEditaisBtn.style.cursor = "pointer";
+          meusEditaisBtn.style.fontWeight = "bold";
+          meusEditaisBtn.onclick = () => abrirModalMeusEditais(user.uid);
+
           const logoutBtn = document.createElement('button');
           logoutBtn.textContent = "Sair";
           logoutBtn.style.backgroundColor = "#dc3545";
@@ -60,13 +82,11 @@
           logoutBtn.style.padding = "8px 16px";
           logoutBtn.style.cursor = "pointer";
           logoutBtn.style.fontWeight = "bold";
-
           logoutBtn.onclick = () => {
-            firebase.auth().signOut().then(() => {
-              window.location.reload();
-            });
+            firebase.auth().signOut().then(() => window.location.reload());
           };
 
+          header.appendChild(meusEditaisBtn);
           header.appendChild(logoutBtn);
         } else {
           const loginBtn = document.createElement('button');
@@ -90,7 +110,6 @@
           cadastrarBtn.style.fontWeight = "bold";
           cadastrarBtn.style.transition = "all 0.3s ease";
 
-          // Efeito hover
           cadastrarBtn.addEventListener('mouseenter', () => {
             cadastrarBtn.style.backgroundColor = "#28a745";
             cadastrarBtn.style.color = "white";
@@ -108,6 +127,54 @@
         }
       });
     });
+
+    function abrirModalMeusEditais(userId) {
+      const lista = document.getElementById('listaEditaisMatriculados');
+      lista.innerHTML = '<li>Carregando...</li>';
+      document.getElementById('meusEditaisModal').style.display = 'flex';
+
+      // Verifica tipo do usuário
+      firebase.database().ref(`usuarios/${userId}/tipo`).once('value').then(tipoSnap => {
+        const tipo = tipoSnap.val() || 'gratuito';
+        const ref = firebase.database().ref(`usuarios/${userId}/matriculados`);
+
+        ref.once('value').then(snapshot => {
+          const dados = snapshot.val();
+          lista.innerHTML = '';
+
+          if (!dados) {
+            lista.innerHTML = '<li>Você ainda não está matriculado em nenhum edital.</li>';
+            return;
+          }
+
+          if (tipo === 'premium') {
+            for (const idEdital in dados) {
+              const cargos = dados[idEdital];
+              for (const nomeCargo in cargos) {
+                const matricula = cargos[nomeCargo];
+                const li = document.createElement('li');
+                li.textContent = `${matricula.nome} - Cargo: ${matricula.cargo}`;
+                lista.appendChild(li);
+              }
+            }
+          } else {
+            const li = document.createElement('li');
+            li.textContent = `${dados.nome} - Cargo: ${dados.cargo}`;
+            lista.appendChild(li);
+          }
+        }).catch(error => {
+          console.error('Erro ao buscar editais:', error);
+          lista.innerHTML = '<li>Erro ao carregar seus editais.</li>';
+        });
+      }).catch(error => {
+        console.error('Erro ao verificar tipo de usuário:', error);
+        lista.innerHTML = '<li>Erro ao carregar tipo do usuário.</li>';
+      });
+    }
+
+    function fecharModalMeusEditais() {
+      document.getElementById('meusEditaisModal').style.display = 'none';
+    }
   </script>
 </body>
 </html>

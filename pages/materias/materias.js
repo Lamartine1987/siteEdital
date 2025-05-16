@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const titulo = document.getElementById("tituloEdital");
   const container = document.getElementById("materiasContainer");
-  const tituloSecao = document.getElementById("tituloSecao"); // <-- para controlar "Assuntos"
+  const tituloSecao = document.getElementById("tituloSecao");
   const breadcrumb = document.getElementById("breadcrumb");
 
   if (!idEdital) {
@@ -14,20 +14,15 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  const db = firebase.database();
-
-  db.ref("editais")
+  firebase
+    .database()
+    .ref("editais")
     .once("value")
     .then((snapshot) => {
       const editais = snapshot.val();
-      let editalEncontrado = null;
-
-      for (const chave in editais) {
-        if (editais[chave].id === idEdital) {
-          editalEncontrado = editais[chave];
-          break;
-        }
-      }
+      const editalEncontrado = Object.values(editais).find(
+        (e) => e.id === idEdital
+      );
 
       if (!editalEncontrado) {
         titulo.textContent = "Edital não encontrado.";
@@ -35,24 +30,17 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       titulo.textContent = editalEncontrado.nome;
+      breadcrumb.textContent = cargoSelecionado
+        ? materiaSelecionada
+          ? `Cargos › ${cargoSelecionado} › ${materiaSelecionada}`
+          : `Cargos › ${cargoSelecionado}`
+        : `Cargos`;
 
-      // Breadcrumb dinâmico
-      if (cargoSelecionado && materiaSelecionada) {
-        breadcrumb.textContent = `Cargos › ${cargoSelecionado} › ${materiaSelecionada}`;
-      } else if (cargoSelecionado) {
-        breadcrumb.textContent = `Cargos › ${cargoSelecionado}`;
-      } else {
-        breadcrumb.textContent = `Cargos`;
-      }
-
-      container.innerHTML = '';
-
+      container.innerHTML = "";
       const cargos = editalEncontrado.cargos;
 
-      // === TELA DE CARGOS ===
       if (!cargoSelecionado && !materiaSelecionada) {
-        tituloSecao.style.display = "none"; // Esconde "Assuntos"
-
+        tituloSecao.style.display = "none";
         const grupo = document.createElement("div");
         grupo.className = "grupo-cargos";
 
@@ -63,30 +51,149 @@ document.addEventListener("DOMContentLoaded", function () {
         const lista = document.createElement("div");
         lista.className = "cards-container";
 
-        for (const nomeCargo in cargos) {
-          const card = document.createElement("div");
-          card.className = "card-materia";
-          card.innerHTML = `<h3>${nomeCargo}</h3>`;
-          card.onclick = () => {
-            window.location.href = `paginaEditais.html?id=${idEdital}&cargo=${nomeCargo}`;
-          };
-          lista.appendChild(card);
-        }
+        firebase.auth().onAuthStateChanged(function (user) {
+          if (!user) return;
 
-        grupo.appendChild(subtitulo);
-        grupo.appendChild(lista);
-        container.appendChild(grupo);
-      }
+          firebase
+            .database()
+            .ref(`usuarios/${user.uid}/tipo`)
+            .once("value")
+            .then((tipoSnapshot) => {
+              const tipoUsuario = tipoSnapshot.val() || "gratuito";
+              const isPremium = tipoUsuario === "premium";
 
-      // === TELA DE MATÉRIAS ===
-      else if (cargoSelecionado && !materiaSelecionada) {
+              for (const nomeCargo in cargos) {
+                const card = document.createElement("div");
+                card.className = "card-materia";
+                card.innerHTML = `<h3>${nomeCargo}</h3>`;
+
+                const btn = document.createElement("button");
+                btn.className = "btn-matricular";
+                btn.style.marginTop = "10px";
+                btn.style.padding = "6px 12px";
+                btn.style.border = "none";
+                btn.style.borderRadius = "6px";
+                btn.style.cursor = "pointer";
+                btn.style.fontWeight = "bold";
+
+                const ref = isPremium
+                  ? firebase
+                      .database()
+                      .ref(
+                        `usuarios/${user.uid}/matriculados/${editalEncontrado.id}/${nomeCargo}`
+                      )
+                  : firebase
+                      .database()
+                      .ref(`usuarios/${user.uid}/matriculados`);
+
+                ref.once("value").then((snapshot) => {
+                  const dados = snapshot.val();
+                  const jaMatriculado = isPremium
+                    ? !!dados
+                    : dados?.id === editalEncontrado.id &&
+                      dados?.cargo === nomeCargo;
+
+                  btn.dataset.nomeEdital = editalEncontrado.nome;
+                  btn.dataset.idEdital = editalEncontrado.id;
+                  btn.dataset.nomeCargo = nomeCargo;
+                  btn.dataset.userId = user.uid;
+                  btn.dataset.isPremium = isPremium.toString();
+
+                  const configurarMatricular = () => {
+                    btn.textContent = "Matricular";
+                    btn.style.backgroundColor = "#28a745";
+                    btn.style.color = "white";
+                    btn.onclick = (e) => {
+                      e.stopPropagation();
+                      const matricula = {
+                        nome: editalEncontrado.nome,
+                        id: editalEncontrado.id,
+                        cargo: nomeCargo,
+                        dataMatricula: new Date().toISOString(),
+                      };
+
+                      const refMatricula = isPremium
+                        ? firebase
+                            .database()
+                            .ref(
+                              `usuarios/${user.uid}/matriculados/${editalEncontrado.id}/${nomeCargo}`
+                            )
+                        : firebase
+                            .database()
+                            .ref(`usuarios/${user.uid}/matriculados`);
+
+                      refMatricula
+                        .set(matricula)
+                        .then(() => {
+                          alert("Matriculado com sucesso!");
+                          configurarDesmatricular();
+                        })
+                        .catch((err) => {
+                          console.error("Erro ao matricular:", err);
+                          alert("Erro ao matricular.");
+                        });
+                    };
+                  };
+
+                  const configurarDesmatricular = () => {
+                    btn.textContent = "Desmatricular";
+                    btn.style.backgroundColor = "#dc3545";
+                    btn.style.color = "white";
+                    btn.onclick = async (e) => {
+                      e.stopPropagation();
+                      const updates = {};
+                      if (isPremium) {
+                        updates[
+                          `usuarios/${user.uid}/matriculados/${editalEncontrado.id}/${nomeCargo}`
+                        ] = null;
+                        updates[
+                          `usuarios/${user.uid}/progresso/${editalEncontrado.id}/${nomeCargo}`
+                        ] = null;
+                      } else {
+                        updates[`usuarios/${user.uid}/matriculados`] = null;
+                        updates[`usuarios/${user.uid}/progresso`] = null;
+                      }
+
+                      try {
+                        await firebase.database().ref().update(updates);
+                        alert("Desmatriculado com sucesso!");
+                        configurarMatricular();
+                      } catch (err) {
+                        console.error("Erro ao desmatricular:", err);
+                        alert("Erro ao desmatricular.");
+                      }
+                    };
+                  };
+
+                  jaMatriculado
+                    ? configurarDesmatricular()
+                    : configurarMatricular();
+
+                  card.appendChild(btn);
+                });
+
+                card.onclick = () => {
+                  window.location.href = `paginaEditais.html?id=${idEdital}&cargo=${encodeURIComponent(
+                    nomeCargo
+                  )}`;
+                };
+
+                lista.appendChild(card);
+              }
+
+              grupo.appendChild(subtitulo);
+              grupo.appendChild(lista);
+              container.appendChild(grupo);
+            });
+        });
+      } else if (cargoSelecionado && !materiaSelecionada) {
         tituloSecao.textContent = "Assuntos";
         tituloSecao.style.display = "block";
 
         const cargoData = cargos[cargoSelecionado];
-
         if (!cargoData || !cargoData.materias) {
-          container.innerHTML = "<p>Nenhuma matéria encontrada para este cargo.</p>";
+          container.innerHTML =
+            "<p>Nenhuma matéria encontrada para este cargo.</p>";
           return;
         }
 
@@ -95,17 +202,15 @@ document.addEventListener("DOMContentLoaded", function () {
           card.className = "card-materia";
           card.innerHTML = `<h3>${nomeMateria}</h3>`;
           card.onclick = () => {
-            window.location.href = `assuntos.html?id=${idEdital}&cargo=${cargoSelecionado}&materia=${encodeURIComponent(nomeMateria)}`;
+            window.location.href = `assuntos.html?id=${idEdital}&cargo=${encodeURIComponent(
+              cargoSelecionado
+            )}&materia=${encodeURIComponent(nomeMateria)}`;
           };
           container.appendChild(card);
         }
-      }
-
-      // === TELA DE ASSUNTOS ===
-      else if (cargoSelecionado && materiaSelecionada) {
+      } else if (cargoSelecionado && materiaSelecionada) {
         tituloSecao.textContent = "Assuntos";
         tituloSecao.style.display = "block";
-
         const cargoData = cargos[cargoSelecionado];
         const assuntos = cargoData?.materias?.[materiaSelecionada];
 
@@ -133,4 +238,18 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Erro ao buscar dados:", error);
       titulo.textContent = "Erro ao carregar o edital.";
     });
+
+  document.getElementById("voltarBtn").addEventListener("click", () => {
+    window.location.href = "../index.html";
+  });
+
+  document.getElementById("sairBtn").addEventListener("click", () => {
+    firebase
+      .auth()
+      .signOut()
+      .then(() => {
+        alert("Sessão encerrada!");
+        window.location.href = "../index.html";
+      });
+  });
 });
