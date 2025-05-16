@@ -13,6 +13,7 @@
 
   <script src="js/firebaseConfig.js"></script>
   <script defer src="js/index.js"></script>
+
 </head>
 
 <body>
@@ -47,7 +48,7 @@
   <div id="meusEditaisModal" class="modal" style="display:none;">
     <div class="modal-content">
       <h3>Meus Editais Matriculados</h3>
-      <ul id="listaEditaisMatriculados" style="padding-left: 20px;"></ul>
+      <ul id="listaEditaisMatriculados" style="padding-left: 0; list-style: none;"></ul>
       <div class="modal-buttons">
         <button onclick="fecharModalMeusEditais()" class="cancel-btn">Fechar</button>
       </div>
@@ -64,24 +65,12 @@
         if (user) {
           const meusEditaisBtn = document.createElement('button');
           meusEditaisBtn.textContent = "Meus Editais";
-          meusEditaisBtn.style.backgroundColor = "#007bff";
-          meusEditaisBtn.style.color = "white";
-          meusEditaisBtn.style.border = "none";
-          meusEditaisBtn.style.borderRadius = "6px";
-          meusEditaisBtn.style.padding = "8px 16px";
-          meusEditaisBtn.style.cursor = "pointer";
-          meusEditaisBtn.style.fontWeight = "bold";
+          meusEditaisBtn.className = "confirm-btn";
           meusEditaisBtn.onclick = () => abrirModalMeusEditais(user.uid);
 
           const logoutBtn = document.createElement('button');
           logoutBtn.textContent = "Sair";
-          logoutBtn.style.backgroundColor = "#dc3545";
-          logoutBtn.style.color = "white";
-          logoutBtn.style.border = "none";
-          logoutBtn.style.borderRadius = "6px";
-          logoutBtn.style.padding = "8px 16px";
-          logoutBtn.style.cursor = "pointer";
-          logoutBtn.style.fontWeight = "bold";
+          logoutBtn.className = "cancel-btn";
           logoutBtn.onclick = () => {
             firebase.auth().signOut().then(() => window.location.reload());
           };
@@ -91,35 +80,12 @@
         } else {
           const loginBtn = document.createElement('button');
           loginBtn.textContent = "Login";
-          loginBtn.style.backgroundColor = "#007bff";
-          loginBtn.style.color = "white";
-          loginBtn.style.border = "none";
-          loginBtn.style.borderRadius = "6px";
-          loginBtn.style.padding = "8px 16px";
-          loginBtn.style.cursor = "pointer";
-          loginBtn.style.fontWeight = "bold";
+          loginBtn.className = "confirm-btn";
+          loginBtn.onclick = () => window.location.href = "login.html";
 
           const cadastrarBtn = document.createElement('button');
           cadastrarBtn.textContent = "Cadastrar";
-          cadastrarBtn.style.backgroundColor = "white";
-          cadastrarBtn.style.color = "#28a745";
-          cadastrarBtn.style.border = "2px solid #28a745";
-          cadastrarBtn.style.borderRadius = "6px";
-          cadastrarBtn.style.padding = "8px 16px";
-          cadastrarBtn.style.cursor = "pointer";
-          cadastrarBtn.style.fontWeight = "bold";
-          cadastrarBtn.style.transition = "all 0.3s ease";
-
-          cadastrarBtn.addEventListener('mouseenter', () => {
-            cadastrarBtn.style.backgroundColor = "#28a745";
-            cadastrarBtn.style.color = "white";
-          });
-          cadastrarBtn.addEventListener('mouseleave', () => {
-            cadastrarBtn.style.backgroundColor = "white";
-            cadastrarBtn.style.color = "#28a745";
-          });
-
-          loginBtn.onclick = () => window.location.href = "login.html";
+          cadastrarBtn.className = "btn-cadastrar";
           cadastrarBtn.onclick = () => window.location.href = "cadastro.html";
 
           header.appendChild(loginBtn);
@@ -133,7 +99,6 @@
       lista.innerHTML = '<li>Carregando...</li>';
       document.getElementById('meusEditaisModal').style.display = 'flex';
 
-      // Verifica tipo do usuário
       firebase.database().ref(`usuarios/${userId}/tipo`).once('value').then(tipoSnap => {
         const tipo = tipoSnap.val() || 'gratuito';
         const ref = firebase.database().ref(`usuarios/${userId}/matriculados`);
@@ -143,7 +108,7 @@
           lista.innerHTML = '';
 
           if (!dados) {
-            lista.innerHTML = '<li>Você ainda não está matriculado em nenhum edital.</li>';
+            lista.innerHTML = '<li style="text-align: center;">Você ainda não está matriculado em nenhum edital.</li>';
             return;
           }
 
@@ -153,13 +118,27 @@
               for (const nomeCargo in cargos) {
                 const matricula = cargos[nomeCargo];
                 const li = document.createElement('li');
-                li.textContent = `${matricula.nome} - Cargo: ${matricula.cargo}`;
+                li.style.marginBottom = "16px";
+                li.style.textAlign = "center";
+                li.innerHTML = `
+                  <div style="font-weight: 500; margin-bottom: 6px;">
+                    ${matricula.nome} - Cargo: ${matricula.cargo}
+                  </div>
+                  <button onclick="irParaCurso('${idEdital}', '${nomeCargo}')" class="btn-acessar">Acessar</button>
+                `;
                 lista.appendChild(li);
               }
             }
           } else {
             const li = document.createElement('li');
-            li.textContent = `${dados.nome} - Cargo: ${dados.cargo}`;
+            li.style.marginBottom = "16px";
+            li.style.textAlign = "center";
+            li.innerHTML = `
+              <div style="font-weight: 500; margin-bottom: 6px;">
+                ${dados.nome} - Cargo: ${dados.cargo}
+              </div>
+              <button onclick="irParaCurso('${dados.id}', '${dados.cargo}')" class="btn-acessar">Acessar</button>
+            `;
             lista.appendChild(li);
           }
         }).catch(error => {
@@ -174,6 +153,11 @@
 
     function fecharModalMeusEditais() {
       document.getElementById('meusEditaisModal').style.display = 'none';
+    }
+
+    function irParaCurso(idEdital, nomeCargo) {
+      const url = `materias/paginaEditais.html?id=${encodeURIComponent(idEdital)}&cargo=${encodeURIComponent(nomeCargo)}`;
+      window.location.href = url;
     }
   </script>
 </body>

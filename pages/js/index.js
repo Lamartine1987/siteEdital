@@ -1,5 +1,10 @@
+function irParaCurso(idEdital, nomeCargo) {
+  const url = `materias/paginaEditais.html?id=${encodeURIComponent(idEdital)}&cargo=${encodeURIComponent(nomeCargo)}`;
+  window.location.href = url;
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-  const db = firebase.database(); // ✅ Realtime DB
+  const db = firebase.database();
   const container = document.getElementById('editaisContainer');
   const searchInput = document.getElementById('searchInput');
   let editais = [];
@@ -7,8 +12,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // 🔄 Buscar editais do Realtime Database
   db.ref("editais").once("value").then(snapshot => {
     const data = snapshot.val();
-
-    // Transforma objeto em array
     editais = Object.values(data);
     renderEditais(editais);
   });
@@ -24,24 +27,34 @@ document.addEventListener('DOMContentLoaded', function () {
       `;
 
       card.addEventListener('click', () => {
-        firebase.auth().onAuthStateChanged(function(user) {
+        firebase.auth().onAuthStateChanged(function (user) {
           if (user) {
             window.location.href = `materias/paginaEditais.html?id=${encodeURIComponent(edital.id)}`;
           } else {
-            document.getElementById('loginModal').style.display = 'flex';
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'flex';
 
-            // Redirecionamento dos botões do modal
-            document.getElementById('modalLoginBtn').addEventListener('click', () => {
-              window.location.href = "login.html";
-            });
+            // ✅ Adiciona listeners apenas uma vez
+            const loginBtn = document.getElementById('modalLoginBtn');
+            const registerBtn = document.getElementById('modalRegisterBtn');
+            const closeBtn = document.getElementById('modalCloseBtn');
 
-            document.getElementById('modalRegisterBtn').addEventListener('click', () => {
-              window.location.href = "cadastro.html";
-            });
+            if (!loginBtn.dataset.listener) {
+              loginBtn.addEventListener('click', () => window.location.href = "login.html");
+              loginBtn.dataset.listener = "true";
+            }
 
-            document.getElementById('modalCloseBtn').addEventListener('click', () => {
-              document.getElementById('loginModal').style.display = 'none';
-            });
+            if (!registerBtn.dataset.listener) {
+              registerBtn.addEventListener('click', () => window.location.href = "cadastro.html");
+              registerBtn.dataset.listener = "true";
+            }
+
+            if (!closeBtn.dataset.listener) {
+              closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+              });
+              closeBtn.dataset.listener = "true";
+            }
           }
         });
       });
