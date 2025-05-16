@@ -5,6 +5,7 @@ body {
   background: #f5f5f5;
 }
 
+/* Cabeçalho fixo e estilizado */
 header {
   display: flex;
   justify-content: space-between;
@@ -14,6 +15,7 @@ header {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Botões padrão */
 .btn {
   padding: 10px 16px;
   border: none;
@@ -23,29 +25,29 @@ header {
   transition: background-color 0.3s ease;
 }
 
+/* Botão Home (ícone circular azul) */
 .btn-home {
   background-color: #007bff;
   color: white;
-  border: none;
   padding: 10px;
   border-radius: 50%;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .btn-home:hover {
   background-color: #0056b3;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn-home svg {
   pointer-events: none;
 }
 
+/* Botão Sair (vermelho) */
 .btn-sair {
   background-color: #dc3545;
   color: white;
@@ -55,27 +57,53 @@ header {
   background-color: #c82333;
 }
 
+/* Container principal da página */
 .container {
   padding: 30px;
 }
 
 h1 {
   color: #333;
+  margin-bottom: 10px;
 }
 
+/* Grupo com título e cards (ex: Cargos) */
+.grupo-cargos {
+  margin-top: 30px;
+}
+
+.grupo-cargos h2 {
+  margin-bottom: 16px;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Área onde os cards ficam lado a lado */
 .cards-container {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
+/* Estilo dos cards individuais */
 .card-materia {
   background-color: #f0f8ff;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 1px 5px rgba(0,0,0,0.1);
-  width: 300px;
+  width: 250px;
+  max-width: 100%;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex: 0 0 auto;
+}
+
+
+.card-materia:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 .card-materia h3 {
@@ -86,3 +114,44 @@ h1 {
 .card-materia ul {
   padding-left: 20px;
 }
+
+/* Card mestre que envolve grupos inteiros */
+.card-mestre {
+  background-color: #ffffff;
+  padding: 20px 30px 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+/* Título interno do card mestre */
+.titulo-cargos {
+  margin: 0 0 20px;
+  font-size: 22px;
+  color: #333;
+}
+
+/* Caminho de navegação (breadcrumb) */
+.breadcrumb {
+  font-size: 16px;
+  font-weight: normal;
+  color: #666;
+  margin-left: 20px;
+}
+
+.breadcrumb::before {
+  content: "›";
+  margin: 0 8px;
+  color: #999;
+}
+
+/* Container do título e breadcrumb juntos */
+.header-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+
+

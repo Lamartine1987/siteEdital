@@ -8,13 +8,14 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script> <!-- Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
-  <!-- Firebase Config (coloque sua configuração real aqui ou em firebaseConfig.js) -->
+  <!-- Firebase Config -->
   <script src="../js/firebaseConfig.js"></script>
 
   <!-- Estilo externo -->
   <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
 
@@ -28,9 +29,18 @@
   </header>
 
   <div class="container">
-    <h1 id="tituloEdital">Carregando edital...</h1>
-    <div id="materiasContainer" class="cards-container"></div>
-  </div>
+    <div class="header-container">
+      <h1 id="tituloEdital">Carregando edital...</h1>
+      <span id="breadcrumb" class="breadcrumb"></span>
+    </div>
+
+    <!-- Grupo de Cargos -->
+    <div class="card-mestre">
+      <h2 id="tituloSecao" class="titulo-cargos" style="display: none;">Assuntos</h2>
+      <div id="materiasContainer" class="cards-container"></div>
+    </div>
+
+
 
   <script>
     // Voltar para a página principal
@@ -47,7 +57,7 @@
     });
   </script>
 
-  <!-- Script com a lógica de exibição das matérias e assuntos -->
+  <!-- Script de exibição dinâmica -->
   <script src="materias.js"></script>
 
 </body>
