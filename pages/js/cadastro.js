@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
   const auth = firebase.auth();
+  const db = firebase.database(); // ⬅️ Importante: adicionar acesso ao database
+
   const nome = document.getElementById('nome');
   const email = document.getElementById('email');
   const senha = document.getElementById('senha');
@@ -22,14 +24,24 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // Desativa o botão durante o processo
     cadastrarBtn.disabled = true;
     cadastrarBtn.textContent = "Aguarde...";
 
     auth.createUserWithEmailAndPassword(emailVal, senhaVal)
       .then(userCredential => {
-        return userCredential.user.updateProfile({
+        const user = userCredential.user;
+
+        // Atualiza o nome exibido no perfil
+        return user.updateProfile({
           displayName: nomeVal
+        }).then(() => {
+          // Salva no Realtime Database com tipo "gratuito"
+          return db.ref("usuarios/" + user.uid).set({
+            nome: nomeVal,
+            email: emailVal,
+            tipo: "gratuito",
+            dataCadastro: new Date().toISOString()
+          });
         });
       })
       .then(() => {
@@ -37,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.href = "./index.html";
       })
       .catch(error => {
+        console.error("Erro ao cadastrar:", error);
         alert("Erro ao cadastrar: " + error.message);
       })
       .finally(() => {
@@ -48,5 +61,4 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('cancelarBtn').addEventListener('click', () => {
     window.location.href = "./index.html";
   });
-    
 });
