@@ -39,204 +39,211 @@ document.addEventListener("DOMContentLoaded", function () {
       container.innerHTML = "";
       const cargos = editalEncontrado.cargos;
 
-      if (!cargoSelecionado && !materiaSelecionada) {
-        tituloSecao.style.display = "none";
-        const grupo = document.createElement("div");
-        grupo.className = "grupo-cargos";
+      firebase.auth().onAuthStateChanged(async function (user) {
+        if (!user) return;
+        const userId = user.uid;
+        const snapUser = await firebase
+          .database()
+          .ref(`usuarios/${userId}`)
+          .once("value");
+        const dadosUsuario = snapUser.val() || {};
+        const tipoUsuario = dadosUsuario.tipo || "gratuito";
+        const matriculados = dadosUsuario.matriculados || {};
 
-        const subtitulo = document.createElement("h2");
-        subtitulo.textContent = "Cargos";
-        subtitulo.className = "titulo-cargos";
+        if (!cargoSelecionado && !materiaSelecionada) {
+          tituloSecao.style.display = "none";
+          const grupo = document.createElement("div");
+          grupo.className = "grupo-cargos";
 
-        const lista = document.createElement("div");
-        lista.className = "cards-container";
+          const subtitulo = document.createElement("h2");
+          subtitulo.textContent = "Cargos";
+          subtitulo.className = "titulo-cargos";
 
-        firebase.auth().onAuthStateChanged(function (user) {
-          if (!user) return;
+          const lista = document.createElement("div");
+          lista.className = "cards-container";
 
-          firebase
-            .database()
-            .ref(`usuarios/${user.uid}/tipo`)
-            .once("value")
-            .then((tipoSnapshot) => {
-              const tipoUsuario = tipoSnapshot.val() || "gratuito";
-              const isPremium = tipoUsuario === "premium";
+          for (const nomeCargo in cargos) {
+            const card = document.createElement("div");
+            card.className = "card-materia";
+            card.innerHTML = `<h3>${nomeCargo}</h3>`;
 
-              for (const nomeCargo in cargos) {
-                const card = document.createElement("div");
-                card.className = "card-materia";
-                card.innerHTML = `<h3>${nomeCargo}</h3>`;
+            const btn = document.createElement("button");
+            btn.className = "btn-matricular";
+            btn.style.marginTop = "10px";
+            btn.style.padding = "6px 12px";
+            btn.style.border = "none";
+            btn.style.borderRadius = "6px";
+            btn.style.cursor = "pointer";
+            btn.style.fontWeight = "bold";
 
-                const btn = document.createElement("button");
-                btn.className = "btn-matricular";
-                btn.style.marginTop = "10px";
-                btn.style.padding = "6px 12px";
-                btn.style.border = "none";
-                btn.style.borderRadius = "6px";
-                btn.style.cursor = "pointer";
-                btn.style.fontWeight = "bold";
+            let estaMatriculado = false;
 
-                const ref = isPremium
-                  ? firebase
-                      .database()
-                      .ref(
-                        `usuarios/${user.uid}/matriculados/${editalEncontrado.id}/${nomeCargo}`
-                      )
-                  : firebase
-                      .database()
-                      .ref(`usuarios/${user.uid}/matriculados`);
+            if (["anual", "edital", "cargo"].includes(tipoUsuario)) {
+              estaMatriculado = !!matriculados?.[idEdital]?.[nomeCargo];
+            } else {
+              estaMatriculado =
+                matriculados?.id === idEdital &&
+                matriculados?.cargo === nomeCargo;
+            }
 
-                ref.once("value").then((snapshot) => {
-                  const dados = snapshot.val();
-                  const jaMatriculado = isPremium
-                    ? !!dados
-                    : dados?.id === editalEncontrado.id &&
-                      dados?.cargo === nomeCargo;
+            const bloquearMatricula = (msg) => alert(msg);
 
-                  btn.dataset.nomeEdital = editalEncontrado.nome;
-                  btn.dataset.idEdital = editalEncontrado.id;
-                  btn.dataset.nomeCargo = nomeCargo;
-                  btn.dataset.userId = user.uid;
-                  btn.dataset.isPremium = isPremium.toString();
+            const matricular = () => {
+              const matricula = {
+                nome: editalEncontrado.nome,
+                id: idEdital,
+                cargo: nomeCargo,
+                dataMatricula: new Date().toISOString(),
+              };
 
-                  const configurarMatricular = () => {
-                    btn.textContent = "Matricular";
-                    btn.style.backgroundColor = "#28a745";
-                    btn.style.color = "white";
-                    btn.onclick = (e) => {
-                      e.stopPropagation();
-                      const matricula = {
-                        nome: editalEncontrado.nome,
-                        id: editalEncontrado.id,
-                        cargo: nomeCargo,
-                        dataMatricula: new Date().toISOString(),
-                      };
+              let ref = ["anual", "edital", "cargo"].includes(tipoUsuario)
+                ? firebase
+                    .database()
+                    .ref(
+                      `usuarios/${userId}/matriculados/${idEdital}/${nomeCargo}`
+                    )
+                : firebase.database().ref(`usuarios/${userId}/matriculados`);
 
-                      const refMatricula = isPremium
-                        ? firebase
-                            .database()
-                            .ref(
-                              `usuarios/${user.uid}/matriculados/${editalEncontrado.id}/${nomeCargo}`
-                            )
-                        : firebase
-                            .database()
-                            .ref(`usuarios/${user.uid}/matriculados`);
+              ref.set(matricula).then(() => {
+                alert("Matriculado com sucesso!");
+                location.reload();
+              });
+            };
 
-                      refMatricula
-                        .set(matricula)
-                        .then(() => {
-                          alert("Matriculado com sucesso!");
-                          configurarDesmatricular();
-                        })
-                        .catch((err) => {
-                          console.error("Erro ao matricular:", err);
-                          alert("Erro ao matricular.");
-                        });
-                    };
+            const desmatricular = () => {
+              const updates = ["anual", "edital", "cargo"].includes(tipoUsuario)
+                ? {
+                    [`usuarios/${userId}/matriculados/${idEdital}/${nomeCargo}`]:
+                      null,
+                    [`usuarios/${userId}/progresso/${idEdital}/${nomeCargo}`]:
+                      null,
+                  }
+                : {
+                    [`usuarios/${userId}/matriculados`]: null,
+                    [`usuarios/${userId}/progresso`]: null,
                   };
 
-                  const configurarDesmatricular = () => {
-                    btn.textContent = "Desmatricular";
-                    btn.style.backgroundColor = "#dc3545";
-                    btn.style.color = "white";
-                    btn.onclick = async (e) => {
-                      e.stopPropagation();
-                      const updates = {};
-                      if (isPremium) {
-                        updates[
-                          `usuarios/${user.uid}/matriculados/${editalEncontrado.id}/${nomeCargo}`
-                        ] = null;
-                        updates[
-                          `usuarios/${user.uid}/progresso/${editalEncontrado.id}/${nomeCargo}`
-                        ] = null;
-                      } else {
-                        updates[`usuarios/${user.uid}/matriculados`] = null;
-                        updates[`usuarios/${user.uid}/progresso`] = null;
-                      }
-
-                      try {
-                        await firebase.database().ref().update(updates);
-                        alert("Desmatriculado com sucesso!");
-                        configurarMatricular();
-                      } catch (err) {
-                        console.error("Erro ao desmatricular:", err);
-                        alert("Erro ao desmatricular.");
-                      }
-                    };
-                  };
-
-                  jaMatriculado
-                    ? configurarDesmatricular()
-                    : configurarMatricular();
-
-                  card.appendChild(btn);
+              firebase
+                .database()
+                .ref()
+                .update(updates)
+                .then(() => {
+                  alert("Desmatriculado com sucesso!");
+                  location.reload();
                 });
+            };
 
-                card.onclick = () => {
-                  window.location.href = `paginaEditais.html?id=${idEdital}&cargo=${encodeURIComponent(
-                    nomeCargo
-                  )}`;
-                };
+            if (estaMatriculado) {
+              btn.textContent = "Desmatricular";
+              btn.style.backgroundColor = "#dc3545";
+              btn.style.color = "white";
+              btn.onclick = (e) => {
+                e.stopPropagation();
+                if (tipoUsuario === "cargo") {
+                  if (
+                    confirm(
+                      "Ao se desmatricular, todo o progresso será perdido. Deseja continuar?"
+                    )
+                  ) {
+                    desmatricular();
+                  }
+                } else {
+                  desmatricular();
+                }
+              };
+            } else {
+              btn.textContent = "Matricular";
+              btn.style.backgroundColor = "#28a745";
+              btn.style.color = "white";
+              btn.onclick = (e) => {
+                e.stopPropagation();
 
-                lista.appendChild(card);
+                if (tipoUsuario === "gratuito") {
+                  const jaMatriculado = Object.keys(matriculados).length > 0;
+                  const editalDiferente = matriculados?.id !== idEdital;
+                  const cargoDiferente = matriculados?.cargo !== nomeCargo;
+
+                  if (jaMatriculado && (editalDiferente || cargoDiferente)) {
+                    bloquearMatricula(
+                      "Você já está matriculado em outro cargo. Para continuar, desmatricule-se primeiro e depois matricule-se em qualquer outro."
+                    );
+                    return;
+                  }
+                } else if (tipoUsuario === "cargo") {
+                  const editaisMatriculados = Object.keys(matriculados || {});
+                  const jaTemOutroEdital = editaisMatriculados.some(
+                    (eid) => eid !== idEdital
+                  );
+
+                  if (jaTemOutroEdital) {
+                    bloquearMatricula(
+                      "Você só pode se matricular em um cargo de um único edital. Desmatricule-se primeiro."
+                    );
+                    return;
+                  }
+
+                  const jaMatriculadoNoMesmoEdital =
+                    Object.keys(matriculados[idEdital] || {}).length > 0;
+                  if (jaMatriculadoNoMesmoEdital) {
+                    bloquearMatricula(
+                      "Você já está matriculado em um cargo neste edital. Desmatricule-se primeiro e depois matricule-se em qualquer outro."
+                    );
+                    return;
+                  }
+                } else if (
+                  tipoUsuario === "edital" &&
+                  !matriculados[idEdital] &&
+                  Object.keys(matriculados).length > 0
+                ) {
+                  bloquearMatricula(
+                    "Você só pode se matricular em cargos do mesmo edital."
+                  );
+                  return;
+                }
+
+                matricular();
+              };
+            }
+
+            card.onclick = (e) => {
+              if (e.target === card || e.target.tagName === "H3") {
+                window.location.href = `paginaEditais.html?id=${idEdital}&cargo=${encodeURIComponent(
+                  nomeCargo
+                )}`;
               }
+            };
 
-              grupo.appendChild(subtitulo);
-              grupo.appendChild(lista);
-              container.appendChild(grupo);
-            });
-        });
-      } else if (cargoSelecionado && !materiaSelecionada) {
-        tituloSecao.textContent = "Assuntos";
-        tituloSecao.style.display = "block";
+            card.appendChild(btn);
+            lista.appendChild(card);
+          }
 
-        const cargoData = cargos[cargoSelecionado];
-        if (!cargoData || !cargoData.materias) {
-          container.innerHTML =
-            "<p>Nenhuma matéria encontrada para este cargo.</p>";
-          return;
+          grupo.appendChild(subtitulo);
+          grupo.appendChild(lista);
+          container.appendChild(grupo);
+        } else if (cargoSelecionado && !materiaSelecionada) {
+          tituloSecao.style.display = "block";
+          tituloSecao.textContent = "Matérias";
+
+          const cargoData = cargos[cargoSelecionado];
+          if (!cargoData || !cargoData.materias) {
+            container.innerHTML =
+              "<p>Nenhuma matéria encontrada para este cargo.</p>";
+            return;
+          }
+
+          for (const nomeMateria in cargoData.materias) {
+            const card = document.createElement("div");
+            card.className = "card-materia";
+            card.innerHTML = `<h3>${nomeMateria}</h3>`;
+            card.onclick = () => {
+              window.location.href = `assuntos.html?id=${idEdital}&cargo=${encodeURIComponent(
+                cargoSelecionado
+              )}&materia=${encodeURIComponent(nomeMateria)}`;
+            };
+            container.appendChild(card);
+          }
         }
-
-        for (const nomeMateria in cargoData.materias) {
-          const card = document.createElement("div");
-          card.className = "card-materia";
-          card.innerHTML = `<h3>${nomeMateria}</h3>`;
-          card.onclick = () => {
-            window.location.href = `assuntos.html?id=${idEdital}&cargo=${encodeURIComponent(
-              cargoSelecionado
-            )}&materia=${encodeURIComponent(nomeMateria)}`;
-          };
-          container.appendChild(card);
-        }
-      } else if (cargoSelecionado && materiaSelecionada) {
-        tituloSecao.textContent = "Assuntos";
-        tituloSecao.style.display = "block";
-        const cargoData = cargos[cargoSelecionado];
-        const assuntos = cargoData?.materias?.[materiaSelecionada];
-
-        if (!assuntos) {
-          container.innerHTML = "<p>Assuntos não encontrados.</p>";
-          return;
-        }
-
-        const card = document.createElement("div");
-        card.className = "card-materia";
-        card.innerHTML = `<h3>${materiaSelecionada}</h3>`;
-
-        const lista = document.createElement("ul");
-        for (const assunto of assuntos) {
-          const li = document.createElement("li");
-          li.textContent = assunto;
-          lista.appendChild(li);
-        }
-
-        card.appendChild(lista);
-        container.appendChild(card);
-      }
-    })
-    .catch((error) => {
-      console.error("Erro ao buscar dados:", error);
-      titulo.textContent = "Erro ao carregar o edital.";
+      });
     });
 
   document.getElementById("voltarBtn").addEventListener("click", () => {

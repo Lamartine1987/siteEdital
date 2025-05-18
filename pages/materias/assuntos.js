@@ -1,8 +1,5 @@
 function logout() {
-  firebase
-    .auth()
-    .signOut()
-    .then(() => (location.href = "../index.html"));
+  firebase.auth().signOut().then(() => (location.href = "../index.html"));
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -25,21 +22,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const userId = user.uid;
 
-    // Verifica se está matriculado
+    // Verifica tipo de conta
     const tipoSnapshot = await db.ref(`usuarios/${userId}/tipo`).once("value");
     const tipoUsuario = tipoSnapshot.val() || "gratuito";
-    const isPremium = tipoUsuario === "premium";
 
-    const refMatricula = isPremium
-      ? db.ref(`usuarios/${userId}/matriculados/${idEdital}/${cargo}`)
-      : db.ref(`usuarios/${userId}/matriculados`);
+    const podeMarcarEstudo = ["cargo", "edital", "anual"].includes(tipoUsuario);
+
+    // Verifica matrícula válida
+    const refMatricula =
+      ["anual", "edital", "cargo"].includes(tipoUsuario)
+        ? db.ref(`usuarios/${userId}/matriculados/${idEdital}/${cargo}`)
+        : db.ref(`usuarios/${userId}/matriculados`);
 
     const matriculaSnap = await refMatricula.once("value");
     const dadosMatricula = matriculaSnap.val();
 
-    const estaMatriculado = isPremium
-      ? !!dadosMatricula
-      : dadosMatricula?.id === idEdital && dadosMatricula?.cargo === cargo;
+    const estaMatriculado =
+      ["anual", "edital", "cargo"].includes(tipoUsuario)
+        ? !!dadosMatricula
+        : dadosMatricula?.id === idEdital && dadosMatricula?.cargo === cargo;
 
     if (!estaMatriculado) {
       alert("Você precisa se matricular neste cargo para visualizar os assuntos.");
@@ -47,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 🔽 Só chega aqui se estiver matriculado
+    // Carrega dados do edital e assuntos
     const snapshot = await db.ref("editais").once("value");
     const editais = snapshot.val();
 
@@ -59,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Carrega progresso salvo
     const progressoSnap = await db
       .ref(`usuarios/${userId}/progresso/${idEdital}/${cargo}/${materia}`)
       .once("value");
@@ -66,6 +68,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     container.innerHTML = "";
 
+    // Exibe aviso de plano se não puder marcar
+    if (!podeMarcarEstudo) {
+      const aviso = document.createElement("div");
+      aviso.className = "aviso-plano";
+      aviso.innerHTML = `
+        <span class="icone">🔒</span>
+        Quer salvar seu progresso? <a href="../cadastro.html">Ative um plano</a> e aproveite recursos extras!
+      `;
+      container.appendChild(aviso); // Aparece dentro da área de assuntos, não no topo
+    }
+
+    // Renderiza os assuntos
     assuntos.forEach((texto) => {
       const assuntoKey = texto
         .trim()
@@ -84,10 +98,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.checked = !!progresso[assuntoKey];
+      checkbox.disabled = !podeMarcarEstudo;
+
       checkbox.onchange = async () => {
+        if (!podeMarcarEstudo) {
+          alert("Você precisa de um plano pago para marcar assuntos como estudado.");
+          checkbox.checked = false;
+          return;
+        }
+
         await db
           .ref(`usuarios/${userId}/progresso/${idEdital}/${cargo}/${materia}/${assuntoKey}`)
           .set(checkbox.checked);
+
         linha.classList.toggle("estudado", checkbox.checked);
       };
 

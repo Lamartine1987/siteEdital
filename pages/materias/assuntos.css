@@ -1,26 +1,43 @@
+:root {
+  --azul-principal: #007bff;
+  --azul-hover: #0056b3;
+  --verde-claro: #d4edda;
+  --amarelo-claro: #fff8e1;
+  --amarelo-borda: #ffe082;
+  --marrom: #795548;
+  --laranja-link: #f57c00;
+}
+
+/* ================= BASE ================= */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   background: #f9f9f9;
 }
 
+.container {
+  max-width: 95%;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+/* ================= HEADER ================= */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 30px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
+/* ================= TÍTULOS ================= */
 h2 {
   text-align: center;
   margin: 10px 0;
 }
 
-.container {
-  max-width: 95%;
-  margin: 0 auto;
-}
-
+/* ================= LINHA DE ASSUNTO ================= */
 .assunto-row {
   display: flex;
   align-items: center;
@@ -30,16 +47,19 @@ h2 {
   border-bottom: 1px solid #ddd;
   margin-bottom: 7px;
   border-radius: 8px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-div.assunto-row.estudado {
-  background-color: #d4edda !important;
-  transition: background-color 0.3s ease;
+.assunto-row:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
+.assunto-row.estudado {
+  background-color: var(--verde-claro);
+}
 
 .assunto-row.header {
-  background-color: #007bff;
+  background-color: var(--azul-principal);
   color: white;
   font-weight: bold;
   border-radius: 10px 10px 0 0;
@@ -49,6 +69,7 @@ div.assunto-row.estudado {
   flex: 1;
 }
 
+/* ================= AÇÕES (checkbox, ícones) ================= */
 .assunto-acoes {
   display: flex;
   align-items: center;
@@ -61,10 +82,11 @@ div.assunto-row.estudado {
   cursor: pointer;
   font-size: 16px;
   color: #555;
+  transition: color 0.3s ease;
 }
 
 .assunto-acoes i:hover {
-  color: #007bff;
+  color: var(--azul-principal);
 }
 
 input[type="checkbox"] {
@@ -72,12 +94,78 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
+/* ================= BOTÕES ================= */
 button {
-  background-color: #007bff;
+  background-color: var(--azul-principal);
   color: white;
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--azul-hover);
+}
+
+/* ================= AVISO DE PLANO ================= */
+.aviso-plano {
+  background: var(--amarelo-claro);
+  border: 1px solid var(--amarelo-borda);
+  color: var(--marrom);
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.aviso-plano:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.aviso-plano .icone {
+  font-size: 22px;
+}
+
+.aviso-plano a {
+  font-weight: bold;
+  color: var(--laranja-link);
+  text-decoration: none;
+  transition: text-decoration 0.3s ease;
+}
+
+.aviso-plano a:hover {
+  text-decoration: underline;
+}
+
+/* ================= RESPONSIVO ================= */
+@media (max-width: 768px) {
+  .assunto-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .assunto-acoes {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  button {
+    width: 100%;
+    text-align: center;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

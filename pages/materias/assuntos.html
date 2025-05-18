@@ -1,48 +1,49 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Assuntos da Matéria</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Assuntos da Matéria</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Estilos -->
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="assuntos.css">
-  <script src="https://kit.fontawesome.com/a2e0e6cfd3.js" crossorigin="anonymous"></script>
-</head>
-<body>
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="assuntos.css" />
+    <script
+      src="https://kit.fontawesome.com/a2e0e6cfd3.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <header>
+      <button onclick="history.back()">Voltar</button>
+      <h2 id="tituloMateria">Assuntos</h2>
+      <button onclick="logout()">Sair</button>
+    </header>
 
-  <header>
-    <button onclick="history.back()">Voltar</button>
-    <h2 id="tituloMateria">Assuntos</h2>
-    <button onclick="logout()">Sair</button>
-  </header>
+    <main class="container">
+      <div class="assunto-row header">
+        <div class="assunto-texto">Assuntos</div>
+        <div class="assunto-acoes"><span>Estudado</span></div>
+      </div>
+      <div id="assuntosContainer"></div>
+    </main>
 
-  <div class="container">
-    <div class="assunto-row header">
-      <div class="assunto-texto">Assuntos</div>
-      <div class="assunto-acoes"><span>Estudado</span></div>
+    <!-- Modal de bloqueio (caso o usuário não esteja matriculado) -->
+    <div id="modalBloqueio" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Acesso Restrito</h3>
+        <p>Você precisa estar matriculado neste cargo para visualizar os assuntos.</p>
+        <button onclick="window.location.href='paginaEditais.html'">Voltar</button>
+      </div>
     </div>
-    <div id="assuntosContainer"></div>
-  </div>
 
-  <div id="modalBloqueio" class="modal" style="display: none;">
-  <div class="modal-content">
-    <h3>Acesso Restrito</h3>
-    <p>Você precisa estar matriculado neste cargo para visualizar os assuntos.</p>
-    <button onclick="window.location.href='paginaEditais.html?id=ID_DO_EDITAL'">Voltar</button>
-  </div>
-</div>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="../js/firebaseConfig.js"></script>
 
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-  <script src="../js/firebaseConfig.js"></script>
-
-  <!-- Script específico da página -->
-  <script src="assuntos.js"></script>
-
-</body>
+    <!-- Script da Página -->
+    <script src="assuntos.js"></script>
+  </body>
 </html>
