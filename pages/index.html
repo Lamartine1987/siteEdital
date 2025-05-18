@@ -1,164 +1,196 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Consulta de Editais</title>
-  <link rel="stylesheet" href="css/style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consulta de Editais</title>
+    <link rel="stylesheet" href="css/style.css" />
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
-  <script src="js/firebaseConfig.js"></script>
-  <script defer src="js/index.js"></script>
+    <script src="js/firebaseConfig.js"></script>
+    <script defer src="js/index.js"></script>
+  </head>
 
-</head>
+  <body>
+    <header
+      id="mainHeader"
+      style="
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      "
+    >
+      <!-- Botões adicionados via JS -->
+    </header>
 
-<body>
-  <header id="mainHeader" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 10px 20px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <!-- Botões adicionados via JS -->
-  </header>
-
-  <div class="search-container">
-    <h1>Consulta de Editais</h1>
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Buscar edital...">
-    </div>
-    <div id="editaisContainer" class="editais-container">
-      <!-- Cards dos editais serão inseridos aqui -->
-    </div>
-  </div>
-
-  <!-- Modal de login/cadastro -->
-  <div id="loginModal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <h3>Acesso Restrito</h3>
-      <p>Você precisa estar logado para visualizar os editais.</p>
-      <div class="modal-buttons">
-        <button id="modalLoginBtn" class="confirm-btn">Fazer Login</button>
-        <button id="modalRegisterBtn" class="confirm-btn">Cadastrar</button>
-        <button id="modalCloseBtn" class="cancel-btn">Fechar</button>
+    <div class="search-container">
+      <h1>Consulta de Editais</h1>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Buscar edital..." />
+      </div>
+      <div id="editaisContainer" class="editais-container">
+        <!-- Cards dos editais serão inseridos aqui -->
       </div>
     </div>
-  </div>
 
-  <!-- Modal Meus Editais -->
-  <div id="meusEditaisModal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <h3>Meus Editais Matriculados</h3>
-      <ul id="listaEditaisMatriculados" style="padding-left: 0; list-style: none;"></ul>
-      <div class="modal-buttons">
-        <button onclick="fecharModalMeusEditais()" class="cancel-btn">Fechar</button>
+    <!-- Modal de login/cadastro -->
+    <div id="loginModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Acesso Restrito</h3>
+        <p>Você precisa estar logado para visualizar os editais.</p>
+        <div class="modal-buttons">
+          <button id="modalLoginBtn" class="confirm-btn">Fazer Login</button>
+          <button id="modalRegisterBtn" class="confirm-btn">Cadastrar</button>
+          <button id="modalCloseBtn" class="cancel-btn">Fechar</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const header = document.getElementById('mainHeader');
+    <!-- Modal Meus Editais -->
+    <div id="meusEditaisModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Meus Editais Matriculados</h3>
+        <ul
+          id="listaEditaisMatriculados"
+          style="padding-left: 0; list-style: none"
+        ></ul>
+        <div class="modal-buttons">
+          <button onclick="fecharModalMeusEditais()" class="cancel-btn">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
 
-      firebase.auth().onAuthStateChanged(function(user) {
-        header.innerHTML = '';
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const header = document.getElementById("mainHeader");
 
-        if (user) {
-          const meusEditaisBtn = document.createElement('button');
-          meusEditaisBtn.textContent = "Meus Editais";
-          meusEditaisBtn.className = "confirm-btn";
-          meusEditaisBtn.onclick = () => abrirModalMeusEditais(user.uid);
+        firebase.auth().onAuthStateChanged(function (user) {
+          header.innerHTML = "";
 
-          const logoutBtn = document.createElement('button');
-          logoutBtn.textContent = "Sair";
-          logoutBtn.className = "cancel-btn";
-          logoutBtn.onclick = () => {
-            firebase.auth().signOut().then(() => window.location.reload());
-          };
+          if (user) {
+            const meusEditaisBtn = document.createElement("button");
+            meusEditaisBtn.textContent = "Meus Editais";
+            meusEditaisBtn.className = "confirm-btn";
+            meusEditaisBtn.onclick = () => abrirModalMeusEditais(user.uid);
 
-          header.appendChild(meusEditaisBtn);
-          header.appendChild(logoutBtn);
-        } else {
-          const loginBtn = document.createElement('button');
-          loginBtn.textContent = "Login";
-          loginBtn.className = "confirm-btn";
-          loginBtn.onclick = () => window.location.href = "login.html";
+            const logoutBtn = document.createElement("button");
+            logoutBtn.textContent = "Sair";
+            logoutBtn.className = "cancel-btn";
+            logoutBtn.onclick = () => {
+              firebase
+                .auth()
+                .signOut()
+                .then(() => window.location.reload());
+            };
 
-          const cadastrarBtn = document.createElement('button');
-          cadastrarBtn.textContent = "Cadastrar";
-          cadastrarBtn.className = "btn-cadastrar";
-          cadastrarBtn.onclick = () => window.location.href = "cadastro.html";
-
-          header.appendChild(loginBtn);
-          header.appendChild(cadastrarBtn);
-        }
-      });
-    });
-
-    function abrirModalMeusEditais(userId) {
-      const lista = document.getElementById('listaEditaisMatriculados');
-      lista.innerHTML = '<li>Carregando...</li>';
-      document.getElementById('meusEditaisModal').style.display = 'flex';
-
-      firebase.database().ref(`usuarios/${userId}/tipo`).once('value').then(tipoSnap => {
-        const tipo = tipoSnap.val() || 'gratuito';
-        const ref = firebase.database().ref(`usuarios/${userId}/matriculados`);
-
-        ref.once('value').then(snapshot => {
-          const dados = snapshot.val();
-          lista.innerHTML = '';
-
-          if (!dados) {
-            lista.innerHTML = '<li style="text-align: center;">Você ainda não está matriculado em nenhum edital.</li>';
-            return;
-          }
-
-          if (tipo === 'premium') {
-            for (const idEdital in dados) {
-              const cargos = dados[idEdital];
-              for (const nomeCargo in cargos) {
-                const matricula = cargos[nomeCargo];
-                const li = document.createElement('li');
-                li.style.marginBottom = "16px";
-                li.style.textAlign = "center";
-                li.innerHTML = `
-                  <div style="font-weight: 500; margin-bottom: 6px;">
-                    ${matricula.nome} - Cargo: ${matricula.cargo}
-                  </div>
-                  <button onclick="irParaCurso('${idEdital}', '${nomeCargo}')" class="btn-acessar">Acessar</button>
-                `;
-                lista.appendChild(li);
-              }
-            }
+            header.appendChild(meusEditaisBtn);
+            header.appendChild(logoutBtn);
           } else {
-            const li = document.createElement('li');
-            li.style.marginBottom = "16px";
-            li.style.textAlign = "center";
-            li.innerHTML = `
+            const loginBtn = document.createElement("button");
+            loginBtn.textContent = "Login";
+            loginBtn.className = "confirm-btn";
+            loginBtn.onclick = () => (window.location.href = "login.html");
+
+            const cadastrarBtn = document.createElement("button");
+            cadastrarBtn.textContent = "Cadastrar";
+            cadastrarBtn.className = "btn-cadastrar";
+            cadastrarBtn.onclick = () =>
+              (window.location.href = "cadastro.html");
+
+            header.appendChild(loginBtn);
+            header.appendChild(cadastrarBtn);
+          }
+        });
+      });
+
+      function abrirModalMeusEditais(userId) {
+        const lista = document.getElementById("listaEditaisMatriculados");
+        lista.innerHTML = "<li>Carregando...</li>";
+        document.getElementById("meusEditaisModal").style.display = "flex";
+
+        firebase
+          .database()
+          .ref(`usuarios/${userId}/tipo`)
+          .once("value")
+          .then((tipoSnap) => {
+            const tipo = tipoSnap.val() || "gratuito";
+            const ref = firebase
+              .database()
+              .ref(`usuarios/${userId}/matriculados`);
+
+            ref
+              .once("value")
+              .then((snapshot) => {
+                const dados = snapshot.val();
+                lista.innerHTML = "";
+
+                if (!dados) {
+                  lista.innerHTML =
+                    '<li style="text-align: center;">Você ainda não está matriculado em nenhum edital.</li>';
+                  return;
+                }
+
+                if (["anual", "edital", "cargo"].includes(tipo)) {
+                  for (const idEdital in dados) {
+                    const cargos = dados[idEdital];
+                    for (const nomeCargo in cargos) {
+                      const matricula = cargos[nomeCargo];
+                      const li = document.createElement("li");
+                      li.style.marginBottom = "16px";
+                      li.style.textAlign = "center";
+                      li.innerHTML = `
+        <div style="font-weight: 500; margin-bottom: 6px;">
+          ${matricula.nome || "Edital"} - Cargo: ${matricula.cargo || "Cargo"}
+        </div>
+        <button onclick="irParaCurso('${idEdital}', '${nomeCargo}')" class="btn-acessar">Acessar</button>
+      `;
+                      lista.appendChild(li);
+                    }
+                  }
+                } else {
+                  const li = document.createElement("li");
+                  li.style.marginBottom = "16px";
+                  li.style.textAlign = "center";
+                  li.innerHTML = `
               <div style="font-weight: 500; margin-bottom: 6px;">
                 ${dados.nome} - Cargo: ${dados.cargo}
               </div>
               <button onclick="irParaCurso('${dados.id}', '${dados.cargo}')" class="btn-acessar">Acessar</button>
             `;
-            lista.appendChild(li);
-          }
-        }).catch(error => {
-          console.error('Erro ao buscar editais:', error);
-          lista.innerHTML = '<li>Erro ao carregar seus editais.</li>';
-        });
-      }).catch(error => {
-        console.error('Erro ao verificar tipo de usuário:', error);
-        lista.innerHTML = '<li>Erro ao carregar tipo do usuário.</li>';
-      });
-    }
+                  lista.appendChild(li);
+                }
+              })
+              .catch((error) => {
+                console.error("Erro ao buscar editais:", error);
+                lista.innerHTML = "<li>Erro ao carregar seus editais.</li>";
+              });
+          })
+          .catch((error) => {
+            console.error("Erro ao verificar tipo de usuário:", error);
+            lista.innerHTML = "<li>Erro ao carregar tipo do usuário.</li>";
+          });
+      }
 
-    function fecharModalMeusEditais() {
-      document.getElementById('meusEditaisModal').style.display = 'none';
-    }
+      function fecharModalMeusEditais() {
+        document.getElementById("meusEditaisModal").style.display = "none";
+      }
 
-    function irParaCurso(idEdital, nomeCargo) {
-      const url = `materias/paginaEditais.html?id=${encodeURIComponent(idEdital)}&cargo=${encodeURIComponent(nomeCargo)}`;
-      window.location.href = url;
-    }
-  </script>
-</body>
+      function irParaCurso(idEdital, nomeCargo) {
+        const url = `materias/paginaEditais.html?id=${encodeURIComponent(
+          idEdital
+        )}&cargo=${encodeURIComponent(nomeCargo)}`;
+        window.location.href = url;
+      }
+    </script>
+  </body>
 </html>
