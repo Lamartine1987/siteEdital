@@ -16,7 +16,7 @@
 
 /* ========== BASE ========== */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   background: #f9f9f9;
   font-size: 16px;
@@ -125,6 +125,10 @@ h1, h2 {
   flex-grow: 1;
   white-space: normal;
   word-break: break-word;
+  font-weight: 400;
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: #333;
 }
 
 .tempo-total {
