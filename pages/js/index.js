@@ -1,7 +1,8 @@
-function irParaCurso(idEdital, nomeCargo) {
-  const url = `materias/paginaEditais.html?id=${encodeURIComponent(idEdital)}&cargo=${encodeURIComponent(nomeCargo)}`;
+function irParaCurso(idEdital) {
+  const url = `materias/paginaEditais.html?id=${encodeURIComponent(idEdital)}`;
   window.location.href = url;
 }
+
 
 document.addEventListener('DOMContentLoaded', function () {
   const db = firebase.database();

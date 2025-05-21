@@ -1,4 +1,8 @@
-/* ===== Base ===== */
+/* ===== Base Global ===== */
+* {
+  box-sizing: border-box;
+}
+
 body, html {
   margin: 0;
   padding: 0;
@@ -7,6 +11,16 @@ body, html {
 }
 
 /* ===== Cabeçalho ===== */
+header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 header button {
   padding: 8px 16px;
   border: none;
@@ -22,7 +36,7 @@ header button:hover {
   background-color: #0056b3;
 }
 
-/* ===== Busca e Container ===== */
+/* ===== Container de Busca ===== */
 .search-container {
   display: flex;
   flex-direction: column;
@@ -63,7 +77,7 @@ h1 {
   box-shadow: 0 0 0 3px rgba(30, 129, 243, 0.15);
 }
 
-/* ===== Lista de Editais ===== */
+/* ===== Cards de Editais ===== */
 .editais-container {
   display: flex;
   flex-wrap: wrap;
@@ -75,15 +89,25 @@ h1 {
   background: white;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 260px;
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.6s ease forwards;
+}
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .edital-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .edital-title {
@@ -98,7 +122,7 @@ h1 {
   color: #555;
 }
 
-/* ===== Modal genérico ===== */
+/* ===== Modal Genérico ===== */
 .modal {
   position: fixed;
   top: 0;
@@ -114,18 +138,19 @@ h1 {
 
 .modal-content {
   background: white;
-  padding: 20px;
+  padding: 24px 32px;
   border-radius: 12px;
-  width: 300px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  text-align: center;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  text-align: left;
 }
 
 .modal-buttons {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 15px;
+  margin-top: 20px;
 }
 
 .modal-buttons button {
@@ -155,23 +180,6 @@ h1 {
   background-color: #b52b27;
 }
 
-/* ===== Botão Acessar no Modal ===== */
-.btn-acessar {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-.btn-acessar:hover {
-  background-color: #218838;
-}
-
 .btn-cadastrar {
   background-color: white;
   color: #28a745;
@@ -188,19 +196,24 @@ h1 {
   color: white;
 }
 
-.edital-card {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeUp 0.6s ease forwards;
+/* ===== Botão "Acessar" ===== */
+.btn-acessar {
+  background-color: #28a745;
+  color: white;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
 }
 
-@keyframes fadeUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.btn-acessar:hover {
+  background-color: #218838;
 }
 
+/* ===== Responsividade ===== */
 @media (max-width: 768px) {
   .edital-card {
     width: 90%;
@@ -209,6 +222,7 @@ h1 {
   .search-box {
     flex-direction: column;
     gap: 12px;
+    padding: 0;
   }
 
   header {
@@ -217,4 +231,3 @@ h1 {
     padding: 10px;
   }
 }
-
