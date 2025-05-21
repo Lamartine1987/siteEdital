@@ -6,13 +6,15 @@
   --amarelo-borda: #ffe082;
   --marrom: #795548;
   --laranja-link: #f57c00;
+  --verde-ativo: #28a745;
 }
 
-/* ================= BASE ================= */
+/* ========== BASE ========== */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   background: #f9f9f9;
+  font-size: 16px;
 }
 
 .container {
@@ -21,7 +23,7 @@ body {
   padding: 0 10px;
 }
 
-/* ================= HEADER ================= */
+/* ========== HEADER ========== */
 header {
   display: flex;
   justify-content: space-between;
@@ -31,13 +33,13 @@ header {
   gap: 10px;
 }
 
-/* ================= TÍTULOS ================= */
+/* ========== TÍTULOS ========== */
 h2 {
   text-align: center;
   margin: 10px 0;
 }
 
-/* ================= LINHA DE ASSUNTO ================= */
+/* ========== LINHA DE ASSUNTO ========== */
 .assunto-row {
   display: flex;
   align-items: center;
@@ -67,15 +69,18 @@ h2 {
 
 .assunto-texto {
   flex: 1;
+  font-size: 15px;
+  line-height: 1.4;
 }
 
-/* ================= AÇÕES (checkbox, ícones) ================= */
+/* ========== AÇÕES (checkbox, cronômetro, editar, excluir) ========== */
 .assunto-acoes {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 12px;
   min-width: 140px;
-  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .assunto-acoes i {
@@ -94,7 +99,36 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
-/* ================= BOTÕES ================= */
+/* ========== CRONÔMETRO ========== */
+.iniciar-cronometro {
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 16px;
+  color: #007bff;
+}
+
+.iniciar-cronometro:hover {
+  color: var(--azul-hover);
+}
+
+.iniciar-cronometro.ativo {
+  color: var(--verde-ativo);
+}
+
+.iniciar-cronometro.ativo:hover {
+  color: #218838;
+}
+
+.contador-tempo {
+  font-size: 12px;
+  margin-left: 8px;
+  color: #444;
+  font-weight: bold;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* ========== BOTÕES GERAIS ========== */
 button {
   background-color: var(--azul-principal);
   color: white;
@@ -110,7 +144,7 @@ button:hover {
   background-color: var(--azul-hover);
 }
 
-/* ================= AVISO DE PLANO ================= */
+/* ========== AVISO DE PLANO ========== */
 .aviso-plano {
   background: var(--amarelo-claro);
   border: 1px solid var(--amarelo-borda);
@@ -146,7 +180,7 @@ button:hover {
   text-decoration: underline;
 }
 
-/* ================= RESPONSIVO ================= */
+/* ========== RESPONSIVO ========== */
 @media (max-width: 768px) {
   .assunto-row {
     flex-direction: column;
@@ -167,5 +201,9 @@ button:hover {
   header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .contador-tempo {
+    margin-left: 0;
   }
 }

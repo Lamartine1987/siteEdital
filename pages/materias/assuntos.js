@@ -1,5 +1,8 @@
+// Função de logout
 function logout() {
-  firebase.auth().signOut().then(() => (location.href = "../index.html"));
+  firebase.auth().signOut().then(() => {
+    location.href = "../index.html";
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -21,26 +24,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const userId = user.uid;
-
-    // Verifica tipo de conta
     const tipoSnapshot = await db.ref(`usuarios/${userId}/tipo`).once("value");
     const tipoUsuario = tipoSnapshot.val() || "gratuito";
-
     const podeMarcarEstudo = ["cargo", "edital", "anual"].includes(tipoUsuario);
 
-    // Verifica matrícula válida
-    const refMatricula =
-      ["anual", "edital", "cargo"].includes(tipoUsuario)
-        ? db.ref(`usuarios/${userId}/matriculados/${idEdital}/${cargo}`)
-        : db.ref(`usuarios/${userId}/matriculados`);
+    const refMatricula = podeMarcarEstudo
+      ? db.ref(`usuarios/${userId}/matriculados/${idEdital}/${cargo}`)
+      : db.ref(`usuarios/${userId}/matriculados`);
 
     const matriculaSnap = await refMatricula.once("value");
     const dadosMatricula = matriculaSnap.val();
 
-    const estaMatriculado =
-      ["anual", "edital", "cargo"].includes(tipoUsuario)
-        ? !!dadosMatricula
-        : dadosMatricula?.id === idEdital && dadosMatricula?.cargo === cargo;
+    const estaMatriculado = podeMarcarEstudo
+      ? !!dadosMatricula
+      : dadosMatricula?.id === idEdital && dadosMatricula?.cargo === cargo;
 
     if (!estaMatriculado) {
       alert("Você precisa se matricular neste cargo para visualizar os assuntos.");
@@ -48,7 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Carrega dados do edital e assuntos
     const snapshot = await db.ref("editais").once("value");
     const editais = snapshot.val();
 
@@ -60,15 +56,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Carrega progresso salvo
     const progressoSnap = await db
       .ref(`usuarios/${userId}/progresso/${idEdital}/${cargo}/${materia}`)
       .once("value");
     const progresso = progressoSnap.val() || {};
 
+    const tempoSnap = await db
+      .ref(`usuarios/${userId}/tempoEstudo/${idEdital}/${cargo}/${materia}`)
+      .once("value");
+    const tempoEstudo = tempoSnap.val() || {};
+
     container.innerHTML = "";
 
-    // Exibe aviso de plano se não puder marcar
     if (!podeMarcarEstudo) {
       const aviso = document.createElement("div");
       aviso.className = "aviso-plano";
@@ -76,16 +75,20 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="icone">🔒</span>
         Quer salvar seu progresso? <a href="../cadastro.html">Ative um plano</a> e aproveite recursos extras!
       `;
-      container.appendChild(aviso); // Aparece dentro da área de assuntos, não no topo
+      container.appendChild(aviso);
     }
 
-    // Renderiza os assuntos
+    const cronometros = {}; // Controla cronômetros ativos
+
+    function formatarTempo(segundos) {
+      const h = Math.floor(segundos / 3600);
+      const m = Math.floor((segundos % 3600) / 60);
+      const s = segundos % 60;
+      return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    }
+
     assuntos.forEach((texto) => {
-      const assuntoKey = texto
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, "_")
-        .replace(/[^\w]/g, "");
+      const assuntoKey = texto.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^\w]/g, "");
 
       const linha = document.createElement("div");
       linha.className = "assunto-row";
@@ -107,12 +110,60 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        await db
-          .ref(`usuarios/${userId}/progresso/${idEdital}/${cargo}/${materia}/${assuntoKey}`)
+        await db.ref(`usuarios/${userId}/progresso/${idEdital}/${cargo}/${materia}/${assuntoKey}`)
           .set(checkbox.checked);
 
         linha.classList.toggle("estudado", checkbox.checked);
       };
+
+      const cronometro = document.createElement("i");
+      cronometro.className = "fas fa-clock iniciar-cronometro";
+      cronometro.title = "Iniciar estudo";
+
+      const contador = document.createElement("span");
+      contador.className = "contador-tempo";
+      let tempoInicial = tempoEstudo[assuntoKey] || 0;
+      contador.textContent = formatarTempo(tempoInicial);
+
+      // Inicializa o intervalo como nulo
+      cronometros[assuntoKey] = {
+        elemento: cronometro,
+        tempo: tempoInicial,
+        intervalo: null,
+        atualizar: () => {
+          cronometros[assuntoKey].tempo += 1;
+          contador.textContent = formatarTempo(cronometros[assuntoKey].tempo);
+        }
+      };
+
+      cronometro.addEventListener("click", () => {
+        const atual = cronometros[assuntoKey];
+
+        if (atual.intervalo) {
+          // PARAR o cronômetro
+          clearInterval(atual.intervalo);
+          atual.intervalo = null;
+          cronometro.classList.remove("ativo");
+
+          db.ref(`usuarios/${userId}/tempoEstudo/${idEdital}/${cargo}/${materia}/${assuntoKey}`)
+            .set(atual.tempo);
+        } else {
+          // PARAR os outros cronômetros
+          Object.keys(cronometros).forEach((chave) => {
+            if (cronometros[chave].intervalo) {
+              clearInterval(cronometros[chave].intervalo);
+              cronometros[chave].elemento.classList.remove("ativo");
+              db.ref(`usuarios/${userId}/tempoEstudo/${idEdital}/${cargo}/${materia}/${chave}`)
+                .set(cronometros[chave].tempo);
+              cronometros[chave].intervalo = null;
+            }
+          });
+
+          // INICIAR atual
+          cronometro.classList.add("ativo");
+          atual.intervalo = setInterval(() => atual.atualizar(), 1000);
+        }
+      });
 
       const editar = document.createElement("i");
       editar.className = "fas fa-pen";
@@ -133,6 +184,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const actions = document.createElement("div");
       actions.className = "assunto-acoes";
+      actions.appendChild(cronometro);
+      actions.appendChild(contador);
       actions.appendChild(checkbox);
       actions.appendChild(editar);
       actions.appendChild(excluir);

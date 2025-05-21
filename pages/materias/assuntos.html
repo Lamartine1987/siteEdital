@@ -8,16 +8,22 @@
     <!-- Estilos -->
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="assuntos.css" />
-    <script
-      src="https://kit.fontawesome.com/a2e0e6cfd3.js"
-      crossorigin="anonymous"
-    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
   </head>
+
   <body>
     <header>
-      <button onclick="history.back()">Voltar</button>
-      <h2 id="tituloMateria">Assuntos</h2>
-      <button onclick="logout()">Sair</button>
+      <button
+        onclick="history.back()"
+        aria-label="Voltar para a página anterior"
+      >
+        Voltar
+      </button>
+      <h1 id="tituloMateria">Assuntos</h1>
+      <button onclick="logout()" aria-label="Encerrar sessão">Sair</button>
     </header>
 
     <main class="container">
@@ -32,8 +38,13 @@
     <div id="modalBloqueio" class="modal" style="display: none">
       <div class="modal-content">
         <h3>Acesso Restrito</h3>
-        <p>Você precisa estar matriculado neste cargo para visualizar os assuntos.</p>
-        <button onclick="window.location.href='paginaEditais.html'">Voltar</button>
+        <p>
+          Você precisa estar matriculado neste cargo para visualizar os
+          assuntos.
+        </p>
+        <button onclick="window.location.href='paginaEditais.html'">
+          Voltar
+        </button>
       </div>
     </div>
 
