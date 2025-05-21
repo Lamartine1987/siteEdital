@@ -61,11 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .once("value");
     const progresso = progressoSnap.val() || {};
 
-    const tempoSnap = await db
-      .ref(`usuarios/${userId}/tempoEstudo/${idEdital}/${cargo}/${materia}`)
-      .once("value");
-    const tempoEstudo = tempoSnap.val() || {};
-
     container.innerHTML = "";
 
     if (!podeMarcarEstudo) {
@@ -78,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
       container.appendChild(aviso);
     }
 
-    const cronometros = {}; // Controla cronômetros ativos
+    const cronometros = {};
 
     function formatarTempo(segundos) {
       const h = Math.floor(segundos / 3600);
@@ -87,45 +82,87 @@ document.addEventListener("DOMContentLoaded", () => {
       return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
     }
 
-    assuntos.forEach((texto) => {
+    function adicionarRegistroHistorico(registro, lista) {
+      const li = document.createElement("li");
+      const data = new Date(registro.data);
+      const tempo = formatarTempo(registro.tempo);
+      li.textContent = `${data.toLocaleString("pt-BR")} - ${tempo}`;
+      lista.prepend(li);
+    }
+
+    assuntos.forEach(async (texto) => {
       const assuntoKey = texto.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^\w]/g, "");
 
-      const linha = document.createElement("div");
-      linha.className = "assunto-row";
-      if (progresso[assuntoKey]) linha.classList.add("estudado");
+      const item = document.createElement("div");
+      item.className = "assunto-item";
 
-      const span = document.createElement("div");
-      span.className = "assunto-texto";
-      span.textContent = texto;
+      const cabecalho = document.createElement("div");
+      cabecalho.className = "assunto-cabecalho";
 
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = !!progresso[assuntoKey];
-      checkbox.disabled = !podeMarcarEstudo;
+      const tituloSpan = document.createElement("span");
+      tituloSpan.className = "titulo-assunto";
+      tituloSpan.textContent = texto;
 
-      checkbox.onchange = async () => {
-        if (!podeMarcarEstudo) {
-          alert("Você precisa de um plano pago para marcar assuntos como estudado.");
-          checkbox.checked = false;
-          return;
-        }
+      const totalSpan = document.createElement("span");
+      totalSpan.className = "tempo-total"; // precisa ter no CSS
 
-        await db.ref(`usuarios/${userId}/progresso/${idEdital}/${cargo}/${materia}/${assuntoKey}`)
-          .set(checkbox.checked);
+      const iconeSeta = document.createElement("i");
+      iconeSeta.className = "fas fa-chevron-down";
 
-        linha.classList.toggle("estudado", checkbox.checked);
-      };
+      cabecalho.appendChild(tituloSpan);
+      cabecalho.appendChild(totalSpan);
+      cabecalho.appendChild(iconeSeta);
+
+      cabecalho.addEventListener("click", () => {
+        item.classList.toggle("expandido");
+      });
+
+      const detalhes = document.createElement("div");
+      detalhes.className = "assunto-detalhes";
+
+      const blocoCrono = document.createElement("div");
+      blocoCrono.className = "bloco-cronometro";
 
       const cronometro = document.createElement("i");
-      cronometro.className = "fas fa-clock iniciar-cronometro";
-      cronometro.title = "Iniciar estudo";
+      cronometro.className = "iniciar-cronometro fas play";
+      cronometro.title = "Clique para iniciar ou pausar o tempo de estudo";
+
+      const labelCrono = document.createElement("span");
+      labelCrono.className = "label-cronometro";
+      labelCrono.textContent = "Iniciar estudo";
 
       const contador = document.createElement("span");
       contador.className = "contador-tempo";
-      let tempoInicial = tempoEstudo[assuntoKey] || 0;
-      contador.textContent = formatarTempo(tempoInicial);
+      contador.textContent = "00:00:00";
 
-      // Inicializa o intervalo como nulo
+      const salvarBtn = document.createElement("i");
+      salvarBtn.className = "icon-salvar";
+      salvarBtn.title = "Salvar tempo de estudo";
+
+      const resetarBtn = document.createElement("i");
+      resetarBtn.className = "icon-reiniciar";
+      resetarBtn.title = "Reiniciar tempo";
+
+      const listaHistorico = document.createElement("ul");
+      listaHistorico.className = "lista-historico";
+
+      const historicoSnap = await db
+        .ref(`usuarios/${userId}/tempoEstudo/${idEdital}/${cargo}/${materia}/${assuntoKey}`)
+        .once("value");
+      const historico = historicoSnap.val();
+      let tempoTotal = 0;
+
+      if (historico) {
+        Object.values(historico).forEach((registro) => {
+          tempoTotal += registro.tempo || 0;
+          adicionarRegistroHistorico(registro, listaHistorico);
+        });
+      }
+
+      totalSpan.textContent = formatarTempo(tempoTotal);
+
+      let tempoInicial = 0;
+
       cronometros[assuntoKey] = {
         elemento: cronometro,
         tempo: tempoInicial,
@@ -133,66 +170,101 @@ document.addEventListener("DOMContentLoaded", () => {
         atualizar: () => {
           cronometros[assuntoKey].tempo += 1;
           contador.textContent = formatarTempo(cronometros[assuntoKey].tempo);
-        }
+        },
+        label: labelCrono,
       };
 
       cronometro.addEventListener("click", () => {
         const atual = cronometros[assuntoKey];
-
         if (atual.intervalo) {
-          // PARAR o cronômetro
           clearInterval(atual.intervalo);
           atual.intervalo = null;
-          cronometro.classList.remove("ativo");
-
-          db.ref(`usuarios/${userId}/tempoEstudo/${idEdital}/${cargo}/${materia}/${assuntoKey}`)
-            .set(atual.tempo);
+          cronometro.classList.remove("ativo", "pause");
+          cronometro.classList.add("play");
+          labelCrono.textContent = "Iniciar estudo";
         } else {
-          // PARAR os outros cronômetros
           Object.keys(cronometros).forEach((chave) => {
             if (cronometros[chave].intervalo) {
               clearInterval(cronometros[chave].intervalo);
-              cronometros[chave].elemento.classList.remove("ativo");
-              db.ref(`usuarios/${userId}/tempoEstudo/${idEdital}/${cargo}/${materia}/${chave}`)
-                .set(cronometros[chave].tempo);
+              cronometros[chave].elemento.classList.remove("ativo", "pause");
+              cronometros[chave].elemento.classList.add("play");
+              cronometros[chave].label.textContent = "Iniciar estudo";
               cronometros[chave].intervalo = null;
             }
           });
-
-          // INICIAR atual
-          cronometro.classList.add("ativo");
+          cronometro.classList.add("ativo", "pause");
+          cronometro.classList.remove("play");
+          labelCrono.textContent = "Pausar estudo";
           atual.intervalo = setInterval(() => atual.atualizar(), 1000);
         }
       });
 
-      const editar = document.createElement("i");
-      editar.className = "fas fa-pen";
-      editar.title = "Editar";
-      editar.onclick = () => {
-        const novoTexto = prompt("Editar assunto:", texto);
-        if (novoTexto && novoTexto !== texto) {
-          alert("Função de edição será implementada.");
+      salvarBtn.addEventListener("click", async () => {
+        const tempoEstudado = cronometros[assuntoKey].tempo;
+        const agora = new Date();
+        const timestamp = agora.toISOString();
+
+        const registro = { tempo: tempoEstudado, data: timestamp };
+
+        await db
+          .ref(`usuarios/${userId}/tempoEstudo/${idEdital}/${cargo}/${materia}/${assuntoKey}`)
+          .push(registro);
+
+        adicionarRegistroHistorico(registro, listaHistorico);
+
+        tempoTotal += tempoEstudado;
+        totalSpan.textContent = formatarTempo(tempoTotal);
+
+        cronometros[assuntoKey].tempo = 0;
+        contador.textContent = "00:00:00";
+        alert("Sessão salva com sucesso!");
+      });
+
+      resetarBtn.addEventListener("click", () => {
+        clearInterval(cronometros[assuntoKey].intervalo);
+        cronometros[assuntoKey].tempo = 0;
+        contador.textContent = "00:00:00";
+        cronometros[assuntoKey].intervalo = null;
+        cronometro.classList.remove("ativo", "pause");
+        cronometro.classList.add("play");
+        labelCrono.textContent = "Iniciar estudo";
+      });
+
+      blocoCrono.append(cronometro, labelCrono, contador, salvarBtn, resetarBtn, listaHistorico);
+
+      const blocoCheck = document.createElement("div");
+      blocoCheck.className = "bloco-checkbox";
+
+      const labelCheck = document.createElement("label");
+      labelCheck.textContent = "Estudado";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = !!progresso[assuntoKey];
+      checkbox.disabled = !podeMarcarEstudo;
+
+      if (checkbox.checked) item.classList.add("estudado");
+
+      checkbox.onchange = async () => {
+        if (!podeMarcarEstudo) {
+          alert("Você precisa de um plano pago para marcar como estudado.");
+          checkbox.checked = false;
+          return;
         }
+
+        await db
+          .ref(`usuarios/${userId}/progresso/${idEdital}/${cargo}/${materia}/${assuntoKey}`)
+          .set(checkbox.checked);
+
+        item.classList.toggle("estudado", checkbox.checked);
       };
 
-      const excluir = document.createElement("i");
-      excluir.className = "fas fa-trash";
-      excluir.title = "Excluir";
-      excluir.onclick = () => {
-        alert("Função de exclusão será implementada.");
-      };
+      labelCheck.appendChild(checkbox);
+      blocoCheck.appendChild(labelCheck);
 
-      const actions = document.createElement("div");
-      actions.className = "assunto-acoes";
-      actions.appendChild(cronometro);
-      actions.appendChild(contador);
-      actions.appendChild(checkbox);
-      actions.appendChild(editar);
-      actions.appendChild(excluir);
-
-      linha.appendChild(span);
-      linha.appendChild(actions);
-      container.appendChild(linha);
+      detalhes.append(blocoCrono, blocoCheck);
+      item.append(cabecalho, detalhes);
+      container.appendChild(item);
     });
   });
 });
