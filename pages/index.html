@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Consulta de Editais</title>
+
   <link rel="stylesheet" href="css/style.css" />
 
   <!-- Firebase SDKs -->
@@ -11,33 +12,78 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
+  <!-- Firebase Config -->
   <script src="js/firebaseConfig.js"></script>
-  <script defer src="js/index.js"></script>
 </head>
-<body>
-  <header
-    id="mainHeader"
-    style="
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 20px;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    "
-  ></header>
+<body style="margin: 0; font-family: Arial, sans-serif; background-color: #f9f9f9;">
 
-  <div class="search-container">
-    <h1>Consulta de Editais</h1>
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Buscar edital..." />
-    </div>
-    <div id="editaisContainer" class="editais-container"></div>
+  <!-- SIDEBAR MODERNO -->
+  <div id="sidebar" style="
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+    padding: 20px;
+    transition: left 0.3s ease;
+    z-index: 999;
+    color: white;
+  ">
+    <h3 style="margin-top: 0; font-size: 20px;">📋 Menu</h3>
+    <ul style="list-style: none; padding: 0; margin: 0;">
+      <li style="margin-bottom: 12px;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Início</a></li>
+      <li style="margin-bottom: 12px;"><a href="login.html" style="color: white; text-decoration: none;">🔑 Login</a></li>
+      <li style="margin-bottom: 12px;"><a href="cadastro.html" style="color: white; text-decoration: none;">📝 Cadastro</a></li>
+    </ul>
   </div>
 
-  <!-- Modal de login/cadastro -->
-  <div id="loginModal" class="modal" style="display: none">
+  <!-- HEADER -->
+  <header id="mainHeader" style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  ">
+    <button id="menuToggleBtn" style="
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    ">
+      ☰
+    </button>
+    <div id="headerButtons" style="display: flex; gap: 10px;"></div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="search-container" style="padding: 20px;">
+    <h1 style="text-align: center;">Consulta de Editais</h1>
+    <div class="search-box" style="display: flex; justify-content: center; margin-bottom: 30px;">
+      <input type="text" id="searchInput" placeholder="Buscar edital..." style="
+        width: 100%;
+        max-width: 400px;
+        padding: 12px 16px;
+        border: 1px solid #ccc;
+        border-radius: 30px;
+        font-size: 16px;
+        outline: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        background-color: #fff;
+      " />
+    </div>
+    <div id="editaisContainer" class="editais-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;"></div>
+  </div>
+
+  <!-- MODAL LOGIN -->
+  <div id="loginModal" class="modal" style="display: none;">
     <div class="modal-content">
       <h3>Acesso Restrito</h3>
       <p>Você precisa estar logado para visualizar os editais.</p>
@@ -49,23 +95,40 @@
     </div>
   </div>
 
-  <!-- Modal Meus Editais -->
-  <div id="meusEditaisModal" class="modal" style="display: none">
+  <!-- MODAL MEUS EDITAIS -->
+  <div id="meusEditaisModal" class="modal" style="display: none;">
     <div class="modal-content">
       <h3>Meus Editais Matriculados</h3>
-      <ul id="listaEditaisMatriculados" style="padding-left: 0; list-style: none"></ul>
+      <ul id="listaEditaisMatriculados" style="padding-left: 0; list-style: none;"></ul>
       <div class="modal-buttons">
         <button onclick="fecharModalMeusEditais()" class="cancel-btn">Fechar</button>
       </div>
     </div>
   </div>
 
+  <!-- SCRIPTS JS -->
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const header = document.getElementById("mainHeader");
+      const headerButtons = document.getElementById("headerButtons");
+      const menuToggleBtn = document.getElementById("menuToggleBtn");
+      const sidebar = document.getElementById("sidebar");
 
+      // Toggle Sidebar
+      menuToggleBtn.addEventListener("click", () => {
+        const isOpen = sidebar.style.left === "0px";
+        sidebar.style.left = isOpen ? "-250px" : "0px";
+      });
+
+      // Fechar sidebar ao clicar fora
+      document.addEventListener("click", function (e) {
+        if (!sidebar.contains(e.target) && e.target.id !== "menuToggleBtn") {
+          sidebar.style.left = "-250px";
+        }
+      });
+
+      // Exibir botões com base no login
       firebase.auth().onAuthStateChanged(function (user) {
-        header.innerHTML = "";
+        headerButtons.innerHTML = "";
 
         if (user) {
           const meusEditaisBtn = document.createElement("button");
@@ -80,8 +143,8 @@
             firebase.auth().signOut().then(() => window.location.reload());
           };
 
-          header.appendChild(meusEditaisBtn);
-          header.appendChild(logoutBtn);
+          headerButtons.appendChild(meusEditaisBtn);
+          headerButtons.appendChild(logoutBtn);
         } else {
           const loginBtn = document.createElement("button");
           loginBtn.textContent = "Login";
@@ -93,8 +156,8 @@
           cadastrarBtn.className = "btn-cadastrar";
           cadastrarBtn.onclick = () => (window.location.href = "cadastro.html");
 
-          header.appendChild(loginBtn);
-          header.appendChild(cadastrarBtn);
+          headerButtons.appendChild(loginBtn);
+          headerButtons.appendChild(cadastrarBtn);
         }
       });
     });
@@ -153,7 +216,7 @@
           lista.innerHTML = "<li>Erro ao carregar seus editais.</li>";
         });
       }).catch((error) => {
-        console.error("Erro ao verificar tipo de usuário:", error);
+        console.error("Erro ao verificar tipo do usuário:", error);
         lista.innerHTML = "<li>Erro ao carregar tipo do usuário.</li>";
       });
     }
@@ -167,5 +230,8 @@
       window.location.href = url;
     }
   </script>
+
+  <!-- SCRIPT PARA BUSCAR EDITAIS E RENDERIZAR -->
+  <script src="js/index.js" defer></script>
 </body>
 </html>

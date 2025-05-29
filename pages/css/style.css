@@ -231,3 +231,8 @@ h1 {
     padding: 10px;
   }
 }
+
+#sidebar a:hover {
+  text-decoration: underline;
+  opacity: 0.9;
+}
