@@ -1,0 +1,41 @@
+/* ====== HOME: PAINEL DE ESTATÍSTICAS ====== */
+
+.painel-estudos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.estatistica-box {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.estatistica-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.estatistica-box h3 {
+  font-size: 18px;
+  color: #007bff;
+  margin-bottom: 12px;
+}
+
+.estatistica-box p {
+  font-size: 22px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+  .painel-estudos {
+    grid-template-columns: 1fr;
+  }
+}
