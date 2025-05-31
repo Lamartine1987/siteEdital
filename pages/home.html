@@ -1,28 +1,83 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>Painel de Estudos</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="css/home.css" />
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-  <script src="js/firebaseConfig.js" defer></script>
-</head>
-<body>
-  <!-- Sidebar -->
-  <div id="sidebar"> <!-- ... igual ao das outras páginas ... --> </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel de Estudos</title>
 
-  <!-- Header -->
-  <header> <!-- botão ☰ e botão Sair --> </header>
+    <!-- Estilo da Página -->
+    <link rel="stylesheet" href="css/home.css" />
 
-  <!-- Conteúdo do painel -->
-  <div class="container">
-    <h1>📊 Painel de Estudos</h1>
-    <div id="painelEstatisticas" class="painel-estudos"></div>
-  </div>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="js/firebaseConfig.js" defer></script>
+  </head>
 
-  <script src="js/home.js" defer></script>
-</body>
+  <body>
+    <!-- Sidebar carregada dinamicamente -->
+    <div id="sidebar-container"></div>
+
+    <!-- Header fixo -->
+    <header
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1001;
+      "
+    >
+      <!-- Botão de menu (fora do sidebar!) -->
+      <button
+        id="menuToggleBtn"
+        style="
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          padding: 8px 12px;
+          font-size: 20px;
+          cursor: pointer;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+          position: relative;
+          z-index: 1002; /* acima do sidebar */
+        "
+      >
+        ☰
+      </button>
+
+      <!-- Botão de logout -->
+      <button
+        id="sairBtn"
+        style="
+          background-color: #dc3545;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          padding: 8px 14px;
+          font-size: 14px;
+          cursor: pointer;
+        "
+      >
+        Sair
+      </button>
+    </header>
+
+    <!-- Conteúdo principal -->
+    <main class="container" style="padding: 20px">
+      <h1>📊 Painel de Estudos</h1>
+      <div id="painelEstatisticas" class="painel-estudos"></div>
+    </main>
+
+    <!-- Script que carrega a sidebar -->
+    <script src="js/sidebarLoader.js" defer></script>
+
+    <!-- Script com lógica da tela -->
+    <script src="js/home.js" defer></script>
+  </body>
 </html>
