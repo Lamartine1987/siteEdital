@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const sidebarContainer = document.getElementById("sidebar-container");
 
   try {
-    const res = await fetch("/pages/components/sidebar.html");
+    const res = await fetch("./components/sidebar.html");
     if (!res.ok) throw new Error("Arquivo não encontrado!");
     const html = await res.text();
     sidebarContainer.innerHTML = html;
