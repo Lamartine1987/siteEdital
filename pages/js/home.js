@@ -1,18 +1,17 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const painel = document.getElementById("painelEstatisticas");
+  const cursosContainer = document.getElementById("cursosMatriculados");
   const sidebar = document.getElementById("sidebar");
   const menuToggleBtn = document.getElementById("menuToggleBtn");
   const sairBtn = document.getElementById("sairBtn");
 
-  // === LÓGICA DO MENU LATERAL (☰) ===
+  // === ABRE/FECHA MENU LATERAL ===
   if (sidebar && menuToggleBtn) {
-    // Abre ou fecha o menu ao clicar no botão ☰
     menuToggleBtn.addEventListener("click", (e) => {
-      e.stopPropagation(); // evita conflito com o listener global
+      e.stopPropagation();
       sidebar.classList.toggle("ativo");
     });
 
-    // Fecha o menu ao clicar fora dele
     document.addEventListener("click", (e) => {
       if (!sidebar.contains(e.target) && e.target !== menuToggleBtn) {
         sidebar.classList.remove("ativo");
@@ -35,20 +34,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   // === VERIFICA SE O USUÁRIO ESTÁ AUTENTICADO ===
   firebase.auth().onAuthStateChanged(async (user) => {
     if (!user) {
-      window.location.href = "../index.html"; // redireciona se não estiver logado
+      window.location.href = "../index.html";
       return;
     }
 
     const userId = user.uid;
     const db = firebase.database();
 
-    // === BUSCA OS DADOS DE TEMPO DE ESTUDO DO USUÁRIO ===
+    // === TEMPO TOTAL DE ESTUDO ===
     const tempoSnap = await db.ref(`usuarios/${userId}/tempoEstudo`).once("value");
     const tempoEstudo = tempoSnap.val() || {};
-
     let totalSegundos = 0;
 
-    // Soma todos os registros de tempo
     for (const edital in tempoEstudo) {
       for (const cargo in tempoEstudo[edital]) {
         for (const materia in tempoEstudo[edital][cargo]) {
@@ -62,7 +59,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // === FORMATA O TEMPO TOTAL EM h m s ===
     const formatarTempo = (s) => {
       const h = Math.floor(s / 3600);
       const m = Math.floor((s % 3600) / 60);
@@ -70,12 +66,56 @@ document.addEventListener("DOMContentLoaded", async () => {
       return `${h}h ${m}m ${ss}s`;
     };
 
-    // === EXIBE O RESULTADO NO PAINEL ===
     painel.innerHTML = `
       <div class="estatistica-box">
         <h3>⏱️ Total de Tempo Estudado</h3>
         <p>${formatarTempo(totalSegundos)}</p>
       </div>
     `;
+
+    // === CURSOS MATRICULADOS COMO LISTA ===
+    if (cursosContainer) {
+      cursosContainer.innerHTML = "<p>Carregando cursos...</p>";
+
+      const matriculadosSnap = await db.ref(`usuarios/${userId}/matriculados`).once("value");
+      const dados = matriculadosSnap.val();
+
+      cursosContainer.innerHTML = "";
+
+      if (!dados) {
+        cursosContainer.innerHTML = "<p>Você ainda não está matriculado em nenhum curso.</p>";
+        return;
+      }
+
+      const listaCursos = document.createElement("ul");
+      listaCursos.className = "lista-cursos";
+
+      for (const idEdital in dados) {
+        const cargos = dados[idEdital];
+        for (const nomeCargo in cargos) {
+          const curso = cargos[nomeCargo];
+
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <span class="nome-curso">${curso.nome || "Curso"} - ${curso.cargo || nomeCargo}</span>
+            <button onclick="acessarCurso('${idEdital}', '${nomeCargo}')">Acessar curso</button>
+          `;
+          listaCursos.appendChild(li);
+        }
+      }
+
+      // Cabeçalho + Lista dentro de card
+      const box = document.createElement("div");
+      box.className = "curso-box";
+      box.appendChild(listaCursos);
+
+      cursosContainer.appendChild(box);
+    }
   });
 });
+
+// === FUNÇÃO DE REDIRECIONAMENTO AO CLICAR NO BOTÃO DO CURSO ===
+function acessarCurso(idEdital, nomeCargo) {
+  const url = `materias/paginaEditais.html?id=${encodeURIComponent(idEdital)}&cargo=${encodeURIComponent(nomeCargo)}`;
+  window.location.href = url;
+}
