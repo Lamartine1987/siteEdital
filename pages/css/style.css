@@ -8,17 +8,21 @@ body, html {
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f9f9f9;
+  overflow-x: hidden;
 }
 
 /* ===== Cabeçalho ===== */
 header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 10px 20px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  position: relative;
 }
 
 header button {
@@ -36,18 +40,69 @@ header button:hover {
   background-color: #0056b3;
 }
 
+/* ===== Sidebar (Lateral) ===== */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100%;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  transition: left 0.3s ease;
+  z-index: 1000;
+  color: white;
+}
+
+#sidebar h3 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  white-space: nowrap;
+}
+
+#sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#sidebar li {
+  margin-bottom: 12px;
+}
+
+#sidebar a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+#sidebar a:hover {
+  text-decoration: underline;
+  opacity: 0.9;
+}
+
+/* Sidebar ativo */
+#sidebar.ativo {
+  left: 0;
+}
+
 /* ===== Container de Busca ===== */
 .search-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 50px;
+  margin-top: 40px;
   padding: 20px;
 }
 
 h1 {
   color: #333;
   margin-bottom: 30px;
+  font-size: 22px;
+  text-align: center;
 }
 
 .search-box {
@@ -133,7 +188,7 @@ h1 {
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1001;
 }
 
 .modal-content {
@@ -196,7 +251,6 @@ h1 {
   color: white;
 }
 
-/* ===== Botão "Acessar" ===== */
 .btn-acessar {
   background-color: #28a745;
   color: white;
@@ -213,26 +267,70 @@ h1 {
   background-color: #218838;
 }
 
-/* ===== Responsividade ===== */
+/* ===== Responsivo ===== */
 @media (max-width: 768px) {
-  .edital-card {
-    width: 90%;
+  header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    gap: 10px;
+  }
+
+  #menuToggleBtn {
+    font-size: 22px;
+    padding: 6px 10px;
+    background: none;
+    color: #007bff;
+    border: none;
+    margin: 0;
+    cursor: pointer;
+    align-self: flex-start;
+  }
+
+  #headerButtons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  #headerButtons button {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+
+  .search-container {
+    margin-top: 20px;
+    padding: 12px;
   }
 
   .search-box {
+    width: 100%;
+    padding: 0 12px;
+    gap: 10px;
     flex-direction: column;
-    gap: 12px;
-    padding: 0;
   }
 
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 10px;
+  #searchInput {
+    font-size: 15px;
+    padding: 10px 16px;
+  }
+
+  h1 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .edital-card {
+    width: 95%;
+    margin: 0 auto;
+  }
+
+  #sidebar {
+    width: 220px;
+    padding: 16px;
   }
 }
 
-#sidebar a:hover {
-  text-decoration: underline;
-  opacity: 0.9;
-}
+

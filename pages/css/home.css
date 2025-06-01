@@ -1,9 +1,13 @@
 /* ====== ESTILO GERAL DO PAINEL DE ESTUDOS ====== */
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f8f9fa;
-  overflow-x: hidden; /* impede rolagem lateral */
+  overflow-x: hidden;
 }
 
 /* ====== CONTAINER PRINCIPAL ====== */
@@ -20,7 +24,7 @@ h1 {
   margin-bottom: 20px;
 }
 
-/* ====== PAINEL DE ESTATÍSTICAS (GRID DE CARDS) ====== */
+/* ====== PAINEL DE ESTATÍSTICAS ====== */
 .painel-estudos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -28,7 +32,6 @@ h1 {
   margin-top: 30px;
 }
 
-/* ====== CARD DE ESTATÍSTICA ====== */
 .estatistica-box {
   background: #ffffff;
   border-radius: 12px;
@@ -56,25 +59,24 @@ h1 {
   transition: all 0.2s ease-in-out;
 }
 
-/* ====== SIDEBAR (MENU LATERAL) ====== */
+/* ====== SIDEBAR ====== */
 #sidebar {
   position: fixed;
   top: 0;
-  left: 0;
-  transform: translateX(-100%);
+  left: -250px;
   width: 250px;
   height: 100%;
   background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
   padding: 20px;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
+  transition: left 0.3s ease;
   z-index: 1000;
   overflow-y: auto;
 }
 
 #sidebar.ativo {
-  transform: translateX(0);
+  left: 0;
 }
 
 #sidebar h3 {
@@ -103,9 +105,10 @@ h1 {
 
 #sidebar a:hover {
   text-decoration: underline;
+  opacity: 0.9;
 }
 
-/* ====== SOBREPOSIÇÃO ESCURA QUANDO MENU ESTÁ ATIVO ====== */
+/* ====== SOBREPOSIÇÃO ESCURA ====== */
 body.sidebar-ativo::before {
   content: "";
   position: fixed;
@@ -117,79 +120,69 @@ body.sidebar-ativo::before {
   z-index: 999;
 }
 
-/* (Opcional) empurrar conteúdo com o menu */
-body.sidebar-ativo main,
-body.sidebar-ativo .container {
-  margin-left: 0; /* ou 250px se quiser empurrar o conteúdo */
-}
-
-/* ====== BOTÃO DO MENU (☰) ====== */
-#menuToggleBtn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 14px;
-  font-size: 20px;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-}
-
-#menuToggleBtn:hover {
-  background-color: #0056b3;
-}
-
-/* ====== BOTÃO DE SAIR ====== */
-#sairBtn {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-#sairBtn:hover {
-  background-color: #c82333;
-}
-
-/* ====== HEADER (TOPO DA PÁGINA) ====== */
+/* ====== HEADER ====== */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
   padding: 10px 20px;
-  background-color: #ffffff;
+  background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 10;
   position: relative;
 }
 
-/* ====== RESPONSIVO (MOBILE) ====== */
+/* ====== BOTÕES DENTRO DO HEADER (IDÊNTICOS AO INDEX) ====== */
+header button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+header button:hover {
+  background-color: #0056b3;
+}
+
+/* Botão de sair com cor vermelha, igual ao index */
+#sairBtn {
+  background-color: #dc3545;
+}
+
+#sairBtn:hover {
+  background-color: #b52b27;
+}
+
+/* ====== RESPONSIVO ====== */
 @media (max-width: 768px) {
   .painel-estudos {
     grid-template-columns: 1fr;
   }
 
   header {
-    flex-direction: row;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 16px;
+    gap: 10px;
   }
 
-  #menuToggleBtn,
-  #sairBtn {
-    font-size: 16px;
-    padding: 8px 10px;
-  }
-
-  /* Garante que o botão fique visível acima do sidebar */
-  #menuToggleBtn {
-    z-index: 1100;
-    position: relative;
+  h1 {
+    font-size: 20px;
   }
 
   #sidebar {
     width: 220px;
+    padding: 16px;
+  }
+
+  #menuToggleBtn,
+  #sairBtn {
+    width: 100%;
   }
 }
