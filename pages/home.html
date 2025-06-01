@@ -31,6 +31,17 @@
     <main class="container">
       <h1>📊 Painel de Estudos</h1>
 
+      <div style="display: flex; gap: 16px; margin-bottom: 20px">
+        <select
+          id="selectCurso"
+          style="padding: 6px; border-radius: 6px"
+        ></select>
+        <select
+          id="selectMateria"
+          style="padding: 6px; border-radius: 6px"
+        ></select>
+      </div>
+
       <!-- Estatísticas -->
       <div id="painelEstatisticas" class="painel-estudos"></div>
 
@@ -39,7 +50,8 @@
         <!-- Coluna 1: Cursos matriculados -->
         <div class="coluna metade">
           <h2>Cursos Matriculados</h2>
-          <div id="cursosMatriculados"></div> <!-- 🔄 AQUI: substituí o <ul> por <div> -->
+          <div id="cursosMatriculados"></div>
+          <!-- 🔄 AQUI: substituí o <ul> por <div> -->
         </div>
 
         <!-- Coluna 2: Espaço reservado -->
