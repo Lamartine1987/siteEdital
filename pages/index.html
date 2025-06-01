@@ -98,7 +98,7 @@
         // Carrega o sidebar.html dinamicamente
         const container = document.getElementById("sidebar-container");
 
-        fetch("/pages/components/sidebar.html")
+        fetch("./components/sidebar.html")
           .then((res) => res.ok ? res.text() : Promise.reject("Erro ao carregar sidebar"))
           .then((html) => {
             container.innerHTML = html;
