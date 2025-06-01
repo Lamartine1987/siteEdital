@@ -1,4 +1,4 @@
-/* ====== ESTILO GERAL DO PAINEL DE ESTUDOS ====== */
+/* ====== BASE GLOBAL ====== */
 * {
   box-sizing: border-box;
 }
@@ -58,7 +58,7 @@ h1 {
   color: #333;
 }
 
-/* ====== LINHA COM DUAS COLUNAS (50% CADA) ====== */
+/* ====== LINHA COM DUAS COLUNAS ====== */
 .linha-dividida {
   display: flex;
   flex-wrap: wrap;
@@ -68,9 +68,36 @@ h1 {
 
 .coluna.metade {
   flex: 1 1 48%;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* ====== CURSOS MATRICULADOS ====== */
+.coluna.metade h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coluna.metade h2::before {
+  content: "📘";
+  font-size: 20px;
+  display: inline-block;
+}
+
+#outrasInformacoes h2::before {
+  content: "💡";
+}
+
+/* ====== LISTA DE CURSOS ====== */
 .lista-cursos {
   list-style: none;
   padding: 0;
@@ -88,6 +115,7 @@ h1 {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .lista-cursos li .nome-curso {
@@ -96,7 +124,14 @@ h1 {
   flex-grow: 1;
 }
 
-/* Botão ao lado do nome do curso */
+/* Acesso e progresso agrupados à direita */
+.lista-cursos .acoes-curso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Botão acessar curso */
 .lista-cursos li button {
   background-color: #007bff;
   color: white;
@@ -112,6 +147,14 @@ h1 {
 
 .lista-cursos li button:hover {
   background-color: #0056b3;
+}
+
+/* Porcentagem de progresso */
+.progresso-curso {
+  font-size: 14px;
+  font-weight: 600;
+  color: #007bff;
+  white-space: nowrap;
 }
 
 /* ====== SIDEBAR ====== */
@@ -163,7 +206,7 @@ h1 {
   opacity: 0.9;
 }
 
-/* ====== SOBREPOSIÇÃO ESCURA AO ATIVAR SIDEBAR ====== */
+/* ====== SOBREPOSIÇÃO AO ATIVAR SIDEBAR ====== */
 body.sidebar-ativo::before {
   content: "";
   position: fixed;
@@ -175,7 +218,7 @@ body.sidebar-ativo::before {
   z-index: 999;
 }
 
-/* ====== HEADER (TOPO FIXO) ====== */
+/* ====== HEADER TOPO ====== */
 header {
   display: flex;
   justify-content: space-between;
@@ -212,7 +255,7 @@ header button:hover {
   background-color: #b52b27;
 }
 
-/* ====== RESPONSIVO (TELAS PEQUENAS) ====== */
+/* ====== RESPONSIVO ====== */
 @media (max-width: 768px) {
   .painel-estudos {
     grid-template-columns: 1fr;
@@ -224,6 +267,7 @@ header button:hover {
 
   .coluna.metade {
     width: 100%;
+    padding: 20px 16px;
   }
 
   header {
@@ -247,51 +291,13 @@ header button:hover {
   header button {
     width: auto;
   }
-}
 
-/* ====== VISUAL MODERNO DAS DIVS DE COLUNAS ====== */
-.coluna.metade {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 24px 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+  .lista-cursos li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-/* Título das seções dentro das colunas */
-.coluna.metade h2 {
-  margin: 0;
-  font-size: 20px;
-  color: #333;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Ícone ao lado do título (opcional) */
-.coluna.metade h2::before {
-  content: "📘";
-  font-size: 20px;
-  display: inline-block;
-}
-
-/* Remove ícone da segunda coluna se quiser */
-#outrasInformacoes h2::before {
-  content: "💡";
-}
-
-/* Ajuste suave para listas dentro das colunas */
-.lista-cursos {
-  margin-top: 0;
-}
-
-/* Responsivo mantém visual consistente */
-@media (max-width: 768px) {
-  .coluna.metade {
-    padding: 20px 16px;
+  .lista-cursos .acoes-curso {
+    justify-content: flex-start;
   }
 }
-
