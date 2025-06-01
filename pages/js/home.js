@@ -1,13 +1,12 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const painel = document.getElementById("painelEstatisticas");
   const cursosContainer = document.getElementById("cursosMatriculados");
-  const selectCurso = document.getElementById("selectCurso");
-  const selectMateria = document.getElementById("selectMateria");
   const sidebar = document.getElementById("sidebar");
   const menuToggleBtn = document.getElementById("menuToggleBtn");
   const sairBtn = document.getElementById("sairBtn");
 
-  // === MENU LATERAL ===
+  let selectCurso, selectMateria;
+
   if (sidebar && menuToggleBtn) {
     menuToggleBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -21,7 +20,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // === SAIR ===
   if (sairBtn) {
     sairBtn.addEventListener("click", () => {
       if (confirm("Deseja realmente sair da sua conta?")) {
@@ -33,7 +31,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // === AUTENTICAÇÃO ===
   firebase.auth().onAuthStateChanged(async (user) => {
     if (!user) {
       window.location.href = "../index.html";
@@ -43,9 +40,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const userId = user.uid;
     const db = firebase.database();
 
-    // === Tempo total estudado ===
     const tempoSnap = await db.ref(`usuarios/${userId}/tempoEstudo`).once("value");
     const tempoEstudo = tempoSnap.val() || {};
+
+    const matriculadosSnap = await db.ref(`usuarios/${userId}/matriculados`).once("value");
+    const dados = matriculadosSnap.val() || {};
 
     const formatarTempo = (s) => {
       const h = Math.floor(s / 3600);
@@ -54,69 +53,68 @@ document.addEventListener("DOMContentLoaded", async () => {
       return `${h}h ${m}m ${ss}s`;
     };
 
-    // === Preencher cursos disponíveis ===
-    const matriculadosSnap = await db.ref(`usuarios/${userId}/matriculados`).once("value");
-    const dados = matriculadosSnap.val();
-
-    selectCurso.innerHTML = "<option value=''>Selecione um curso</option>";
-    for (const edital in dados) {
-      for (const cargo in dados[edital]) {
-        const nome = dados[edital][cargo].nome || edital;
-        const cargoNome = dados[edital][cargo].cargo || cargo;
-        const opt = document.createElement("option");
-        opt.value = `${edital}|||${cargo}`;
-        opt.textContent = `${nome} - ${cargoNome}`;
-        selectCurso.appendChild(opt);
-      }
-    }
-
-    // === Tempo total global (inicial)
-    let totalSegundos = 0;
-    for (const edital in tempoEstudo) {
-      for (const cargo in tempoEstudo[edital]) {
-        for (const materia in tempoEstudo[edital][cargo]) {
-          for (const assunto in tempoEstudo[edital][cargo][materia]) {
-            const registros = tempoEstudo[edital][cargo][materia][assunto];
-            for (const key in registros) {
-              totalSegundos += registros[key]?.tempo || 0;
-            }
-          }
-        }
-      }
-    }
-
+    // Exibir painel com relógio zerado inicialmente
     painel.innerHTML = `
       <div class="estatistica-box">
-        <h3>⏱️ Total de Tempo Estudado</h3>
-        <p>${formatarTempo(totalSegundos)}</p>
+        <h3>⏱️ Tempo Estudado</h3>
+        <div class="filtro-curso-materia">
+          <select id="selectCurso"><option value="">Selecione um curso</option></select>
+          <select id="selectMateria" disabled><option value="">Selecione uma matéria</option></select>
+        </div>
+        <p id="tempoEstudadoTexto">0h 0m 0s</p>
       </div>
     `;
 
-    // === Ao selecionar curso, popular matérias
+    selectCurso = document.getElementById("selectCurso");
+    selectMateria = document.getElementById("selectMateria");
+    const tempoEstudadoTexto = document.getElementById("tempoEstudadoTexto");
+
+    for (const edital in dados) {
+      for (const cargo in dados[edital]) {
+        const curso = dados[edital][cargo];
+        const option = document.createElement("option");
+        option.value = `${edital}|||${cargo}`;
+        option.textContent = `${curso.nome || edital} - ${curso.cargo || cargo}`;
+        selectCurso.appendChild(option);
+      }
+    }
+
     selectCurso.addEventListener("change", () => {
       const [edital, cargo] = selectCurso.value.split("|||");
-      selectMateria.innerHTML = "<option value=''>Selecione uma matéria</option>";
+      selectMateria.innerHTML = `<option value="">Selecione uma matéria</option>`;
+      selectMateria.disabled = true;
+      tempoEstudadoTexto.textContent = "0h 0m 0s";
 
-      if (!tempoEstudo[edital] || !tempoEstudo[edital][cargo]) return;
+      if (!tempoEstudo?.[edital]?.[cargo]) return;
 
+      let segundos = 0;
       const materias = Object.keys(tempoEstudo[edital][cargo]);
       materias.forEach((materia) => {
         const opt = document.createElement("option");
         opt.value = materia;
         opt.textContent = materia;
         selectMateria.appendChild(opt);
+
+        // Soma tempo de todas as matérias
+        const assuntos = tempoEstudo[edital][cargo][materia];
+        for (const assunto in assuntos) {
+          const registros = assuntos[assunto];
+          for (const key in registros) {
+            segundos += registros[key]?.tempo || 0;
+          }
+        }
       });
+
+      tempoEstudadoTexto.textContent = formatarTempo(segundos);
+      selectMateria.disabled = false;
     });
 
-    // === Ao selecionar matéria, mostrar tempo total
     selectMateria.addEventListener("change", () => {
       const [edital, cargo] = selectCurso.value.split("|||");
       const materia = selectMateria.value;
       let segundos = 0;
 
-      if (
-        tempoEstudo?.[edital]?.[cargo]?.[materia]
-      ) {
+      if (tempoEstudo?.[edital]?.[cargo]?.[materia]) {
         const assuntos = tempoEstudo[edital][cargo][materia];
         for (const assunto in assuntos) {
           const registros = assuntos[assunto];
@@ -126,19 +124,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
 
-      painel.innerHTML = `
-        <div class="estatistica-box">
-          <h3>📚 Tempo Estudado da Matéria</h3>
-          <p>${formatarTempo(segundos)}</p>
-        </div>
-      `;
+      tempoEstudadoTexto.textContent = formatarTempo(segundos);
     });
 
-    // === Lista de cursos matriculados (sem progresso)
+    // Exibir cursos matriculados
     if (cursosContainer) {
       cursosContainer.innerHTML = "";
 
-      if (!dados) {
+      if (!dados || Object.keys(dados).length === 0) {
         cursosContainer.innerHTML = "<p>Você ainda não está matriculado em nenhum curso.</p>";
         return;
       }
@@ -150,7 +143,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const cargos = dados[idEdital];
         for (const nomeCargo in cargos) {
           const curso = cargos[nomeCargo];
-
           const li = document.createElement("li");
           li.innerHTML = `
             <span class="nome-curso">${curso.nome || "Curso"} - ${curso.cargo || nomeCargo}</span>
@@ -169,6 +161,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function acessarCurso(idEdital, nomeCargo) {
-  const url = `materias/paginaEditais.html?id=${encodeURIComponent(idEdital)}&cargo=${encodeURIComponent(nomeCargo)}`;
+  const url = `materias/paginaEditais.html?id=${encodeURIComponent(idEdital)}&cargoSelecionado=${encodeURIComponent(nomeCargo)}`;
   window.location.href = url;
 }
+
+
+

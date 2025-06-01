@@ -49,7 +49,7 @@ h1 {
 .estatistica-box h3 {
   font-size: 18px;
   color: #007bff;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .estatistica-box p {
@@ -58,27 +58,28 @@ h1 {
   color: #333;
 }
 
-/* ====== SELECT DE CURSO E MATÉRIA ====== */
+/* ====== SELECT DE CURSO E MATÉRIA (DENTRO DO PAINEL) ====== */
 .filtro-curso-materia {
   display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
+  justify-content: center;
+  gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 12px;
 }
 
 .filtro-curso-materia select {
   padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
   font-size: 14px;
-  min-width: 200px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  min-width: 180px;
   background-color: #fff;
   transition: border-color 0.3s ease;
 }
 
 .filtro-curso-materia select:focus {
-  outline: none;
   border-color: #007bff;
+  outline: none;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
 

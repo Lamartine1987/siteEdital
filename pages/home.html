@@ -16,10 +16,10 @@
   </head>
 
   <body>
-    <!-- Sidebar carregada dinamicamente -->
+    <!-- Sidebar será carregada dinamicamente -->
     <div id="sidebar-container"></div>
 
-    <!-- Header fixo -->
+    <!-- Cabeçalho fixo -->
     <header>
       <button id="menuToggleBtn">☰</button>
       <div id="headerButtons" style="display: flex; gap: 10px">
@@ -31,19 +31,23 @@
     <main class="container">
       <h1>📊 Painel de Estudos</h1>
 
-      <div style="display: flex; gap: 16px; margin-bottom: 20px">
-        <select
-          id="selectCurso"
-          style="padding: 6px; border-radius: 6px"
-        ></select>
-        <select
-          id="selectMateria"
-          style="padding: 6px; border-radius: 6px"
-        ></select>
-      </div>
+      <!-- Painel com estatísticas e filtros -->
+      <div id="painelEstatisticas" class="painel-estudos">
+        <div class="estatistica-box">
+          <h3>⏱️ Total de Tempo Estudado</h3>
+          <p>0h 0m 0s</p>
 
-      <!-- Estatísticas -->
-      <div id="painelEstatisticas" class="painel-estudos"></div>
+          <!-- Filtros internos -->
+          <div class="filtro-curso-materia">
+            <select id="selectCurso">
+              <option value="">Selecione um curso</option>
+            </select>
+            <select id="selectMateria">
+              <option value="">Selecione uma matéria</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
       <!-- Linha com duas colunas -->
       <div class="linha-dividida">
@@ -51,13 +55,12 @@
         <div class="coluna metade">
           <h2>Cursos Matriculados</h2>
           <div id="cursosMatriculados"></div>
-          <!-- 🔄 AQUI: substituí o <ul> por <div> -->
         </div>
 
-        <!-- Coluna 2: Espaço reservado -->
+        <!-- Coluna 2: Outras informações -->
         <div class="coluna metade" id="outrasInformacoes">
           <h2>Outras Informações</h2>
-          <!-- conteúdo futuro -->
+          <!-- Conteúdo futuro -->
         </div>
       </div>
     </main>
